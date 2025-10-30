@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rescue Dashboard - Suraksha</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/emergency.css') }}">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="dashboard-body">
+    <div class="dashboard-container">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <div class="header-content">
+                <a href="{{ url_for('main.index') }}" class="back-btn">
+                    <i class="fas fa-arrow-left"></i>
+                    Back to Home
+                </a>
+                <h1>🛟 Rescue Dashboard</h1>
+                <p class="subtitle">Live SOS Alerts & Emergency Locations</p>
+                <div class="dashboard-controls">
+                    <button onclick="exportSOSLogs()" class="btn-secondary">
+                        <i class="fas fa-download"></i>
+                        Export SOS Logs
+                    </button>
+                    <a href="{{ url_for('main.emergency_chat') }}" class="btn-primary">
+                        <i class="fas fa-comments"></i>
+                        Go to Chat
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        <!-- Map Container -->
+        <div class="map-container">
+            <div id="map"></div>
+        </div>
+
+        <!-- SOS Logs Table -->
+        <div class="logs-section">
+            <h3>📋 SOS Alert Logs</h3>
+            <div class="table-container">
+                <table id="sos-table">
+                    <thead>
+                        <tr>
+                            <th>Sender</th>
+                            <th>Message</th>
+                            <th>Coordinates</th>
+                            <th>Time</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sos-table-body">
+                        <!-- SOS logs will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/emergency_dashboard.js') }}"></script>
+</body>
+</html>

@@ -25,6 +25,7 @@
                     <li><a href="#about">About</a></li>
                     <li><a href="#how-it-works">How It Works</a></li>
                     <li><a href="#alerts">Alerts</a></li>
+                    <a href="#emergency-comms">Emergency Comms</a>
                     <li><a href="#contact">Contact</a></li>
                 </ul>
             </nav>
@@ -64,11 +65,11 @@
                 <h1>Protect Your Community From Ocean Hazards</h1>
                 <p>Report unusual sea activity and get help quickly with our simple, accessible platform</p>
                 <div class="hero-buttons">
-                    <a href="#report" class="btn btn-large btn-alert">
+                    <a href="{{ url_for('main.login') }}" class="btn btn-large btn-alert">
                         <i class="fas fa-exclamation-circle"></i>
                         Report Hazard
                     </a>
-                    <a href="#alerts" class="btn btn-large btn-info">
+                    <a href="{{ url_for('main.login') }}" class="btn btn-large btn-info">
                         <i class="fas fa-bell"></i>
                         View Alerts
                     </a>
@@ -109,6 +110,68 @@
             <div class="stat-item">
                 <h3>30 min</h3>
                 <p>Average Response Time</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- new communication section  -->
+     <section class="emergency-comms" id="emergency-comms">
+        <div class="container">
+            <h2>Emergency Communication System</h2>
+            <p class="section-description">When internet fails during disasters, our offline communication system keeps you connected with rescue teams and community members.</p>
+            
+            <div class="comms-features">
+                <div class="comms-feature">
+                    <div class="comms-icon">
+                        <i class="fas fa-wifi"></i>
+                    </div>
+                    <h3>Works Offline</h3>
+                    <p>Communicate without internet using local Wi-Fi network</p>
+                </div>
+                <div class="comms-feature">
+                    <div class="comms-icon">
+                        <i class="fas fa-sos"></i>
+                    </div>
+                    <h3>SOS Alerts</h3>
+                    <p>Send emergency alerts with your GPS location</p>
+                </div>
+                <div class="comms-feature">
+                    <div class="comms-icon">
+                        <i class="fas fa-map-marked-alt"></i>
+                    </div>
+                    <h3>Live Tracking</h3>
+                    <p>Rescue teams can see all SOS locations on a map</p>
+                </div>
+                <div class="comms-feature">
+                    <div class="comms-icon">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <h3>Group Chat</h3>
+                    <p>Real-time messaging with everyone on the network</p>
+                </div>
+            </div>
+            
+            <div class="comms-actions">
+                <a href="{{ url_for('main.emergency_chat') }}" class="btn btn-large btn-emergency">
+                    <i class="fas fa-comments"></i>
+                    Join Emergency Chat
+                </a>
+                <a href="{{ url_for('main.emergency_dashboard') }}" class="btn btn-large btn-info">
+                    <i class="fas fa-tachometer-alt"></i>
+                    Rescue Dashboard
+                </a>
+            </div>
+            
+            <div class="comms-info">
+                <div class="info-box">
+                    <h4>How to Use During Emergencies:</h4>
+                    <ul>
+                        <li>Connect to the same Wi-Fi hotspot as others</li>
+                        <li>Open Emergency Chat to communicate</li>
+                        <li>Press SOS button to send your location to rescuers</li>
+                        <li>Rescue teams monitor the dashboard for alerts</li>
+                    </ul>
+                </div>
             </div>
         </div>
     </section>
@@ -243,14 +306,14 @@
             <p>Your report could save lives in your community</p>
             <div class="cta-buttons">
                 <div class="cta-item">
-                    <a href="report.html" class="btn btn-large btn-alert">
+                    <a href="{{ url_for('main.login') }}" class="btn btn-large btn-alert">
                         <i class="fas fa-exclamation-circle"></i>
                         Report Now
                     </a>
                     <p>See something dangerous? Report it immediately</p>
                 </div>
                 <div class="cta-item">
-                    <a href="alerts.html" class="btn btn-large btn-info">
+                    <a href="{{ url_for('main.login') }}" class="btn btn-large btn-info">
                         <i class="fas fa-bell"></i>
                         View Alerts
                     </a>
@@ -308,6 +371,104 @@
         </div>
     </footer>
 
+    <!-- new comm  -->
+     <style>
+        /* Emergency Communication Section Styles */
+        .emergency-comms {
+            background: linear-gradient(135deg, #1a237e 0%, #311b92 100%);
+            color: white;
+            padding: 80px 0;
+        }
+
+        .comms-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+
+        .comms-feature {
+            text-align: center;
+            padding: 2rem 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+        }
+
+        .comms-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #4fc3f7;
+        }
+
+        .comms-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 2rem 0;
+        }
+
+        .btn-emergency {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            border: none;
+        }
+
+        .btn-emergency:hover {
+            background: linear-gradient(45deg, #ff5252, #e74c3c);
+            transform: translateY(-2px);
+        }
+
+        .comms-info {
+            margin-top: 3rem;
+        }
+
+        .info-box {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2rem;
+            border-radius: 12px;
+            border-left: 4px solid #4fc3f7;
+        }
+
+        .info-box ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .info-box li {
+            padding: 0.5rem 0;
+            position: relative;
+            padding-left: 1.5rem;
+        }
+
+        .info-box li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #4fc3f7;
+            font-weight: bold;
+        }
+
+        /* Update existing button styles */
+        .hero-buttons, .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        @media (max-width: 768px) {
+            .comms-actions, .hero-buttons, .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .comms-actions .btn, .hero-buttons .btn, .cta-buttons .btn {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+    </style>
   
 </body>
 </html>

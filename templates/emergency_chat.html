@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emergency Communication - Suraksha</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/emergency.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="emergency-container">
+        <!-- Header -->
+        <header class="emergency-header">
+            <div class="header-content">
+                <a href="{{ url_for('main.index') }}" class="back-btn">
+                    <i class="fas fa-arrow-left"></i>
+                    Back to Home
+                </a>
+                <h1>🚨 Emergency Communication</h1>
+                <p class="subtitle">Offline Local Network Chat & SOS System</p>
+                <div class="connection-status">
+                    <span id="connection-indicator">●</span>
+                    <span id="connection-text">Connecting...</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="emergency-main">
+            <!-- Username Section -->
+            <div id="username-section" class="username-section">
+                <div class="card">
+                    <h3>Enter Your Name to Join</h3>
+                    <p>This helps others identify you in the emergency network</p>
+                    <div class="input-group">
+                        <input type="text" id="username-input" placeholder="Your name..." maxlength="20">
+                        <button onclick="setUsername()" class="btn-primary">Join Network</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat Interface -->
+            <div id="chat-interface" class="chat-interface hidden">
+                <!-- SOS Button -->
+                <div class="sos-section">
+                    <button id="sos-btn" class="sos-btn" onclick="sendSOS()">
+                        🚨 SEND SOS ALERT
+                    </button>
+                    <div id="location-status" class="location-status">
+                        📍 Getting location...
+                    </div>
+                </div>
+
+                <!-- Messages Container -->
+                <div class="messages-container">
+                    <div id="messages" class="messages">
+                        <div class="system-message">
+                            Welcome to the emergency communication network. Messages are broadcast locally without internet.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Message Input -->
+                <div class="message-input-section">
+                    <div class="input-group">
+                        <input type="text" id="message-input" placeholder="Type your message..." maxlength="500" onkeypress="handleKeyPress(event)">
+                        <button onclick="sendMessage()" class="btn-primary">Send</button>
+                    </div>
+                    <div class="user-info">
+                        Connected as: <span id="current-user"></span>
+                        | Online: <span id="online-count">1</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast Notification -->
+        <div id="toast" class="toast hidden"></div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/emergency_chat.js') }}"></script>
+</body>
+</html>

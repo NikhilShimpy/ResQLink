@@ -1,6 +1,5 @@
 import os
 from flask import Flask
-from .routes import main_bp
 
 def create_app():
     # Get the absolute path to the project root
@@ -13,5 +12,5 @@ def create_app():
     )
 
     app.secret_key = "supersecretkey"
-    app.register_blueprint(main_bp)
+    
     return app
