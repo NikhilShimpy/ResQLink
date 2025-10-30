@@ -93,7 +93,7 @@ def handle_sos(data):
 if __name__ == "__main__":
     your_ip = "10.69.31.30"  # Your actual IP address
     
-    print("🚀 Starting Suraksha Emergency System...")
+    print("🚀 Starting ResQLink Emergency System...")
     print("")
     print("🌐 NETWORK ACCESS INFORMATION:")
     print("   ┌─────────────────────────────────────────────────┐")

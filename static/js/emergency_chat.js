@@ -5,6 +5,9 @@ class EmergencyChat {
         this.currentLocation = null;
         this.locationWatchId = null;
         this.isConnected = false;
+        this.messageCount = 0;
+        this.autoScrollEnabled = true;
+        this.lastMessageDate = null;
         
         this.initializeApp();
     }
@@ -19,9 +22,14 @@ class EmergencyChat {
         if (savedUsername) {
             document.getElementById('username-input').value = savedUsername;
         }
+
+        // Initialize scroll behavior
+        this.setupScrollBehavior();
     }
 
     initializeSocket() {
+        this.showLoading(true);
+        
         // Connect to Socket.IO server
         this.socket = io();
         
@@ -30,6 +38,7 @@ class EmergencyChat {
             this.isConnected = true;
             this.updateConnectionStatus('Connected', 'connected');
             this.showToast('Connected to emergency network', 'success');
+            this.showLoading(false);
         });
 
         this.socket.on('disconnect', () => {
@@ -37,6 +46,14 @@ class EmergencyChat {
             this.isConnected = false;
             this.updateConnectionStatus('Disconnected', 'disconnected');
             this.showToast('Disconnected from network', 'error');
+            this.showLoading(false);
+        });
+
+        this.socket.on('connect_error', (error) => {
+            console.log('Connection error:', error);
+            this.updateConnectionStatus('Connection Failed', 'disconnected');
+            this.showToast('Failed to connect to network', 'error');
+            this.showLoading(false);
         });
 
         this.socket.on('connected', (data) => {
@@ -46,13 +63,54 @@ class EmergencyChat {
         this.socket.on('new_message', (data) => {
             console.log('New message received:', data);
             this.displayMessage(data);
+            this.scrollToBottom();
         });
 
         this.socket.on('new_sos', (data) => {
             console.log('New SOS received:', data);
             this.displaySOSAlert(data);
-            this.showToast(`🚨 SOS from ${data.sender}`, 'sos');
+            this.showToast(`🚨 SOS Alert from ${data.sender}`, 'sos');
+            this.scrollToBottom();
         });
+
+        // Handle user count updates
+        this.socket.on('user_joined', (data) => {
+            this.updateOnlineCount(data.count);
+        });
+
+        this.socket.on('user_left', (data) => {
+            this.updateOnlineCount(data.count);
+        });
+    }
+
+    setupScrollBehavior() {
+        const messagesContainer = document.querySelector('.messages');
+        const scrollIndicator = document.getElementById('scroll-indicator');
+        
+        messagesContainer.addEventListener('scroll', () => {
+            const isAtBottom = messagesContainer.scrollHeight - messagesContainer.clientHeight <= messagesContainer.scrollTop + 50;
+            
+            if (isAtBottom) {
+                scrollIndicator.classList.remove('visible');
+                this.autoScrollEnabled = true;
+            } else {
+                scrollIndicator.classList.add('visible');
+                this.autoScrollEnabled = false;
+            }
+        });
+
+        // Scroll to bottom when indicator is clicked
+        scrollIndicator.addEventListener('click', () => {
+            this.scrollToBottom();
+            scrollIndicator.classList.remove('visible');
+        });
+    }
+
+    scrollToBottom() {
+        if (this.autoScrollEnabled) {
+            const messagesContainer = document.querySelector('.messages');
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
     }
 
     updateConnectionStatus(text, status) {
@@ -61,6 +119,15 @@ class EmergencyChat {
         
         textElement.textContent = text;
         indicator.className = status;
+    }
+
+    updateOnlineCount(count) {
+        document.getElementById('online-count').textContent = count;
+    }
+
+    updateMessageCount() {
+        this.messageCount++;
+        document.getElementById('message-count').textContent = `${this.messageCount} messages`;
     }
 
     setupEventListeners() {
@@ -79,6 +146,46 @@ class EmergencyChat {
                 this.setUsername();
             }
         });
+
+        // Input focus effects
+        messageInput.addEventListener('focus', () => {
+            messageInput.parentElement.classList.add('focused');
+        });
+
+        messageInput.addEventListener('blur', () => {
+            messageInput.parentElement.classList.remove('focused');
+        });
+
+        // Add clear chat functionality
+        const clearBtn = document.querySelector('.chat-action-btn .fa-trash');
+        if (clearBtn) {
+            clearBtn.closest('.chat-action-btn').addEventListener('click', () => {
+                this.clearChat();
+            });
+        }
+
+        // Add refresh functionality
+        const refreshBtn = document.querySelector('.chat-action-btn .fa-sync-alt');
+        if (refreshBtn) {
+            refreshBtn.closest('.chat-action-btn').addEventListener('click', () => {
+                location.reload();
+            });
+        }
+    }
+
+    clearChat() {
+        const messagesContainer = document.getElementById('messages');
+        const systemMessage = messagesContainer.querySelector('.system-message');
+        
+        // Clear all messages except the system welcome message
+        messagesContainer.innerHTML = '';
+        if (systemMessage) {
+            messagesContainer.appendChild(systemMessage);
+        }
+        
+        this.messageCount = 0;
+        this.updateMessageCount();
+        this.showToast('Chat cleared', 'info');
     }
 
     setUsername() {
@@ -87,21 +194,29 @@ class EmergencyChat {
 
         if (!username) {
             this.showToast('Please enter your name', 'error');
+            usernameInput.focus();
+            return;
+        }
+
+        if (username.length < 2) {
+            this.showToast('Name must be at least 2 characters', 'error');
             return;
         }
 
         this.username = username;
         localStorage.setItem('emergency_username', username);
 
-        // Show chat interface
+        // Show chat interface with animation
         document.getElementById('username-section').classList.add('hidden');
         document.getElementById('chat-interface').classList.remove('hidden');
         document.getElementById('current-user').textContent = username;
 
-        this.showToast(`Welcome ${username}! You're now connected to the network.`, 'success');
+        this.showToast(`Welcome ${username}! You're now connected to the emergency network.`, 'success');
         
-        // Add join message
-        this.displaySystemMessage(`${username} joined the chat`);
+        // Focus on message input
+        setTimeout(() => {
+            document.getElementById('message-input').focus();
+        }, 300);
     }
 
     sendMessage() {
@@ -130,7 +245,7 @@ class EmergencyChat {
             message: message
         });
 
-        // Clear input
+        // Clear input and maintain focus
         messageInput.value = '';
         messageInput.focus();
     }
@@ -151,6 +266,13 @@ class EmergencyChat {
             return;
         }
 
+        // Add confirmation for SOS
+        const confirmed = confirm('🚨 ARE YOU SURE YOU WANT TO SEND AN SOS ALERT?\n\nThis will broadcast your exact location to all users in the network.');
+        
+        if (!confirmed) {
+            return;
+        }
+
         try {
             console.log('Sending SOS with location:', this.currentLocation);
             
@@ -162,68 +284,138 @@ class EmergencyChat {
             });
 
             this.showToast('🚨 SOS Alert Sent! Help is on the way.', 'sos');
+            
+            // Visual feedback for SOS button
+            const sosBtn = document.getElementById('sos-btn');
+            sosBtn.classList.add('sent');
+            setTimeout(() => sosBtn.classList.remove('sent'), 2000);
+            
         } catch (error) {
             console.error('SOS Error:', error);
             this.showToast('Failed to send SOS alert', 'error');
         }
     }
 
+    formatTime(timestamp) {
+        const date = new Date(timestamp * 1000);
+        return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+
+    formatDate(timestamp) {
+        const date = new Date(timestamp * 1000);
+        const today = new Date();
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+
+        if (date.toDateString() === today.toDateString()) {
+            return 'Today';
+        } else if (date.toDateString() === yesterday.toDateString()) {
+            return 'Yesterday';
+        } else {
+            return date.toLocaleDateString([], { day: 'numeric', month: 'short', year: 'numeric' });
+        }
+    }
+
+    shouldShowDate(timestamp) {
+        const currentDate = this.formatDate(timestamp);
+        if (this.lastMessageDate !== currentDate) {
+            this.lastMessageDate = currentDate;
+            return true;
+        }
+        return false;
+    }
+
     displayMessage(data) {
         const messagesContainer = document.getElementById('messages');
+        
+        // Check if we need to show date separator
+        if (this.shouldShowDate(data.timestamp)) {
+            const dateElement = document.createElement('div');
+            dateElement.className = 'date-separator';
+            dateElement.innerHTML = `
+                <span>${this.lastMessageDate}</span>
+            `;
+            messagesContainer.appendChild(dateElement);
+        }
+        
         const messageElement = document.createElement('div');
         
         const isOwnMessage = data.sender === this.username;
         messageElement.className = `message ${isOwnMessage ? 'own' : 'other'}`;
         
-        const timestamp = new Date(data.timestamp * 1000).toLocaleTimeString();
+        const timeString = this.formatTime(data.timestamp);
         
         messageElement.innerHTML = `
-            <div class="message-sender">${this.escapeHtml(data.sender)}</div>
-            <div class="message-text">${this.escapeHtml(data.message)}</div>
-            <div class="message-time">${timestamp}</div>
+            <div class="message-content">
+                ${!isOwnMessage ? `<div class="message-sender">${this.escapeHtml(data.sender)}</div>` : ''}
+                <div class="message-bubble">
+                    <div class="message-text">${this.escapeHtml(data.message)}</div>
+                    <div class="message-time">${timeString}</div>
+                </div>
+            </div>
         `;
 
         messagesContainer.appendChild(messageElement);
-        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        this.updateMessageCount();
+        this.scrollToBottom();
     }
 
     displaySOSAlert(data) {
         const messagesContainer = document.getElementById('messages');
+        
+        // Check if we need to show date separator
+        if (this.shouldShowDate(data.timestamp)) {
+            const dateElement = document.createElement('div');
+            dateElement.className = 'date-separator';
+            dateElement.innerHTML = `
+                <span>${this.lastMessageDate}</span>
+            `;
+            messagesContainer.appendChild(dateElement);
+        }
+        
         const sosElement = document.createElement('div');
         
         sosElement.className = 'message sos-alert';
         
-        const timestamp = new Date(data.timestamp * 1000).toLocaleTimeString();
+        const timeString = this.formatTime(data.timestamp);
         const locationLink = `https://maps.google.com/?q=${data.latitude},${data.longitude}`;
         
         sosElement.innerHTML = `
-            <div class="message-sender">🚨 EMERGENCY SOS</div>
-            <div class="message-text">From: ${this.escapeHtml(data.sender)}</div>
-            <div class="message-text">${this.escapeHtml(data.message)}</div>
-            <div class="message-text">
-                📍 <a href="${locationLink}" target="_blank" style="color: white; text-decoration: underline;">
-                    View Location (${data.latitude.toFixed(4)}, ${data.longitude.toFixed(4)})
-                </a>
+            <div class="sos-content">
+                <div class="sos-bubble">
+                    <div class="sos-header">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span class="sos-title">EMERGENCY SOS</span>
+                    </div>
+                    <div class="sos-details">
+                        <div class="sos-sender">From: ${this.escapeHtml(data.sender)}</div>
+                        <div class="sos-message">${this.escapeHtml(data.message)}</div>
+                        <div class="sos-location">
+                            <a href="${locationLink}" target="_blank" class="location-link">
+                                <i class="fas fa-map-marker-alt"></i>
+                                View Location on Map
+                            </a>
+                        </div>
+                    </div>
+                    <div class="sos-time">${timeString}</div>
+                </div>
             </div>
-            <div class="message-time">${timestamp}</div>
         `;
 
         messagesContainer.appendChild(sosElement);
-        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        this.updateMessageCount();
+        this.scrollToBottom();
 
-        // Emergency sound notification
+        // Emergency sound and visual notification
         this.playSOSSound();
+        this.triggerSOSVisualAlert();
     }
 
-    displaySystemMessage(message) {
-        const messagesContainer = document.getElementById('messages');
-        const systemElement = document.createElement('div');
-        
-        systemElement.className = 'system-message';
-        systemElement.textContent = message;
-
-        messagesContainer.appendChild(systemElement);
-        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    triggerSOSVisualAlert() {
+        document.body.classList.add('sos-flash');
+        setTimeout(() => {
+            document.body.classList.remove('sos-flash');
+        }, 2000);
     }
 
     playSOSSound() {
@@ -245,6 +437,25 @@ class EmergencyChat {
             
             oscillator.start(context.currentTime);
             oscillator.stop(context.currentTime + 0.3);
+            
+            // Play second beep
+            setTimeout(() => {
+                const oscillator2 = context.createOscillator();
+                const gainNode2 = context.createGain();
+                
+                oscillator2.connect(gainNode2);
+                gainNode2.connect(context.destination);
+                
+                oscillator2.frequency.setValueAtTime(800, context.currentTime);
+                oscillator2.frequency.setValueAtTime(600, context.currentTime + 0.1);
+                oscillator2.type = 'sine';
+                
+                gainNode2.gain.setValueAtTime(0.3, context.currentTime);
+                gainNode2.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 0.3);
+                
+                oscillator2.start(context.currentTime);
+                oscillator2.stop(context.currentTime + 0.3);
+            }, 400);
         } catch (error) {
             console.log('Audio not supported');
         }
@@ -252,26 +463,39 @@ class EmergencyChat {
 
     startLocationTracking() {
         const locationStatus = document.getElementById('location-status');
+        const locationAccuracy = document.getElementById('location-accuracy');
         
         if (!navigator.geolocation) {
-            locationStatus.textContent = '📍 Geolocation not supported';
+            locationStatus.innerHTML = '<i class="fas fa-map-marker-alt"></i><span>Geolocation not supported</span>';
             locationStatus.style.color = '#ef4444';
             return;
         }
 
-        locationStatus.textContent = '📍 Getting location...';
+        locationStatus.innerHTML = '<i class="fas fa-map-marker-alt"></i><span>Acquiring location...</span>';
 
         // Get initial position
         navigator.geolocation.getCurrentPosition(
             (position) => {
                 this.updateLocation(position);
-                locationStatus.textContent = '📍 Location acquired';
+                locationStatus.innerHTML = '<i class="fas fa-map-marker-alt"></i><span>Location acquired</span>';
                 locationStatus.style.color = '#10b981';
+                
+                const accuracy = position.coords.accuracy;
+                locationAccuracy.textContent = `Accuracy: ${Math.round(accuracy)} meters`;
+                locationAccuracy.style.color = accuracy < 50 ? '#10b981' : accuracy < 100 ? '#f59e0b' : '#ef4444';
             },
             (error) => {
                 console.error('Geolocation error:', error);
-                locationStatus.textContent = '📍 Location access denied';
+                let errorMessage = 'Location access denied';
+                if (error.code === error.TIMEOUT) {
+                    errorMessage = 'Location timeout';
+                } else if (error.code === error.POSITION_UNAVAILABLE) {
+                    errorMessage = 'Location unavailable';
+                }
+                
+                locationStatus.innerHTML = `<i class="fas fa-map-marker-alt"></i><span>${errorMessage}</span>`;
                 locationStatus.style.color = '#ef4444';
+                locationAccuracy.textContent = 'Enable location for SOS alerts';
             },
             {
                 enableHighAccuracy: true,
@@ -285,7 +509,7 @@ class EmergencyChat {
             (position) => this.updateLocation(position),
             (error) => {
                 console.error('Geolocation watch error:', error);
-                locationStatus.textContent = '📍 Location tracking failed';
+                locationStatus.innerHTML = '<i class="fas fa-map-marker-alt"></i><span>Location tracking failed</span>';
                 locationStatus.style.color = '#ef4444';
             },
             {
@@ -310,25 +534,26 @@ class EmergencyChat {
     showToast(message, type = 'info') {
         const toast = document.getElementById('toast');
         toast.textContent = message;
-        toast.className = 'toast';
+        toast.className = 'toast show';
         
         // Add type-based styling
-        if (type === 'error') {
-            toast.style.background = '#ef4444';
-        } else if (type === 'success') {
-            toast.style.background = '#10b981';
-        } else if (type === 'warning') {
-            toast.style.background = '#f59e0b';
-        } else if (type === 'sos') {
-            toast.style.background = 'linear-gradient(45deg, #dc2626, #f59e0b)';
-        }
+        const typeClass = `toast-${type}`;
+        toast.className = `toast show ${typeClass}`;
         
-        toast.classList.remove('hidden');
-        
-        // Auto-hide after 3 seconds
+        // Auto-hide after appropriate time
+        const hideTime = type === 'sos' ? 5000 : 3000;
         setTimeout(() => {
-            toast.classList.add('hidden');
-        }, 3000);
+            toast.classList.remove('show');
+        }, hideTime);
+    }
+
+    showLoading(show) {
+        const loadingOverlay = document.getElementById('loading-overlay');
+        if (show) {
+            loadingOverlay.classList.remove('hidden');
+        } else {
+            loadingOverlay.classList.add('hidden');
+        }
     }
 
     escapeHtml(unsafe) {

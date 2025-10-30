@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Emergency Communication - Suraksha</title>
+    <title>Emergency Communication - ResQLink</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/emergency.css') }}">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="emergency-container">
@@ -17,11 +18,24 @@
                     <i class="fas fa-arrow-left"></i>
                     Back to Home
                 </a>
-                <h1>🚨 Emergency Communication</h1>
-                <p class="subtitle">Offline Local Network Chat & SOS System</p>
-                <div class="connection-status">
-                    <span id="connection-indicator">●</span>
-                    <span id="connection-text">Connecting...</span>
+                <div class="header-main">
+                    <div class="logo-section">
+                        <div class="logo">🚨</div>
+                        <div class="header-text">
+                            <h1>Suraksha Emergency Network</h1>
+                            <p class="subtitle">Secure Offline Communication & SOS System</p>
+                        </div>
+                    </div>
+                    <div class="connection-status">
+                        <div class="status-indicator">
+                            <span id="connection-indicator" class="connecting"></span>
+                            <span id="connection-text">Connecting...</span>
+                        </div>
+                        <div class="online-users">
+                            <i class="fas fa-users"></i>
+                            <span id="online-count">1</span> online
+                        </div>
+                    </div>
                 </div>
             </div>
         </header>
@@ -30,46 +44,120 @@
         <div class="emergency-main">
             <!-- Username Section -->
             <div id="username-section" class="username-section">
-                <div class="card">
-                    <h3>Enter Your Name to Join</h3>
-                    <p>This helps others identify you in the emergency network</p>
+                <div class="welcome-card">
+                    <div class="card-icon">
+                        <i class="fas fa-user-shield"></i>
+                    </div>
+                    <h2>Join Emergency Network</h2>
+                    <p>Enter your name to start secure communication. Your identity helps in emergency coordination.</p>
                     <div class="input-group">
-                        <input type="text" id="username-input" placeholder="Your name..." maxlength="20">
-                        <button onclick="setUsername()" class="btn-primary">Join Network</button>
+                        <div class="input-wrapper">
+                            <i class="fas fa-user"></i>
+                            <input type="text" id="username-input" placeholder="Enter your full name..." maxlength="20">
+                        </div>
+                        <button onclick="setUsername()" class="btn-primary join-btn">
+                            <span>Join Network</span>
+                            <i class="fas fa-sign-in-alt"></i>
+                        </button>
+                    </div>
+                    <div class="security-notice">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>All communications are encrypted and stored locally</span>
                     </div>
                 </div>
             </div>
 
             <!-- Chat Interface -->
             <div id="chat-interface" class="chat-interface hidden">
-                <!-- SOS Button -->
-                <div class="sos-section">
-                    <button id="sos-btn" class="sos-btn" onclick="sendSOS()">
-                        🚨 SEND SOS ALERT
-                    </button>
-                    <div id="location-status" class="location-status">
-                        📍 Getting location...
+                <!-- SOS Emergency Panel -->
+                <div class="sos-panel">
+                    <div class="sos-header">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>Emergency SOS</h3>
                     </div>
-                </div>
-
-                <!-- Messages Container -->
-                <div class="messages-container">
-                    <div id="messages" class="messages">
-                        <div class="system-message">
-                            Welcome to the emergency communication network. Messages are broadcast locally without internet.
+                    <div class="sos-content">
+                        <button id="sos-btn" class="sos-btn" onclick="sendSOS()">
+                            <div class="sos-icon">
+                                <i class="fas fa-bell"></i>
+                            </div>
+                            <div class="sos-text">
+                                <span class="sos-title">SEND SOS ALERT</span>
+                                <span class="sos-subtitle">Broadcast your location to all users</span>
+                            </div>
+                        </button>
+                        <div class="location-info">
+                            <div id="location-status" class="location-status">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span>Acquiring your location...</span>
+                            </div>
+                            <div class="location-accuracy" id="location-accuracy">
+                                High accuracy location enabled
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Message Input -->
-                <div class="message-input-section">
-                    <div class="input-group">
-                        <input type="text" id="message-input" placeholder="Type your message..." maxlength="500" onkeypress="handleKeyPress(event)">
-                        <button onclick="sendMessage()" class="btn-primary">Send</button>
+                <!-- Chat Container -->
+                <div class="chat-container">
+                    <div class="chat-header">
+                        <div class="chat-info">
+                            <h3>Emergency Communications</h3>
+                            <div class="chat-stats">
+                                <span id="message-count">0 messages</span>
+                                <span class="online-dot"></span>
+                                <span id="online-count">1</span> online
+                            </div>
+                        </div>
+                        <div class="chat-actions">
+                            <button class="chat-action-btn" title="Clear Chat">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                            <button class="chat-action-btn" title="Refresh">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
                     </div>
-                    <div class="user-info">
-                        Connected as: <span id="current-user"></span>
-                        | Online: <span id="online-count">1</span>
+
+                    <!-- Messages Container -->
+                    <div class="messages-container">
+                        <div id="messages" class="messages">
+                            <div class="system-message welcome-message">
+                                <div class="system-icon">
+                                    <i class="fas fa-broadcast-tower"></i>
+                                </div>
+                                <div class="system-content">
+                                    <h4>Welcome to Emergency Network</h4>
+                                    <p>All messages are broadcast locally without internet connection. SOS alerts include precise location data.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="scroll-indicator" id="scroll-indicator">
+                            <i class="fas fa-chevron-down"></i>
+                            New messages
+                        </div>
+                    </div>
+
+                    <!-- Message Input -->
+                    <div class="message-input-section">
+                        <div class="input-container">
+                            <div class="input-wrapper chat-input-wrapper">
+                                <input type="text" id="message-input" placeholder="Type your emergency message..." maxlength="500" onkeypress="handleKeyPress(event)">
+                                <button onclick="sendMessage()" class="send-btn">
+                                    <i class="fas fa-paper-plane"></i>
+                                    Send
+                                </button>
+                            </div>
+                        </div>
+                        <div class="user-info">
+                            <div class="user-badge">
+                                <i class="fas fa-user-circle"></i>
+                                <span id="current-user">Guest</span>
+                            </div>
+                            <div class="network-status">
+                                <i class="fas fa-wifi"></i>
+                                <span>Local Network</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -77,6 +165,12 @@
 
         <!-- Toast Notification -->
         <div id="toast" class="toast hidden"></div>
+
+        <!-- Loading Overlay -->
+        <div id="loading-overlay" class="loading-overlay hidden">
+            <div class="loading-spinner"></div>
+            <p>Connecting to emergency network...</p>
+        </div>
     </div>
 
     <script src="{{ url_for('static', filename='js/emergency_chat.js') }}"></script>
