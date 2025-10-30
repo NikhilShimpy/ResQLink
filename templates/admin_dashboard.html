@@ -14,639 +14,840 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <!-- Firebase Auth -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    
+    <!-- Chart.js for 3D Charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
 </head>
 <body>
-    <!-- Header Section -->
-    <header class="admin-header">
-        <nav class="admin-navbar">
-            <div class="nav-brand">
-                <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiMwODY1ZDMiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMiAxMmM0LjI0IDAgNy44Mi0yLjU1IDkuNDEtNi4yMkMyMC4xOSAxMiA5LjIyIDEyIDIuMTIgMTJjMCAwIDQuMjQgMCA5LjQxIDYuMjJDMTAuOTIgMjIuNTUgNC4yNCAyNCAyIDEyeiI+PC9wYXRoPjwvc3ZnPg==" alt="Ocean Hazard Logo" class="logo">
-                <span>ResQLink Admin</span>
+    <!-- Sidebar Navigation -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-container">
+                <div class="logo-3d">
+                    <i class="fas fa-water"></i>
+                </div>
+                <span class="brand-name">ResQLink Admin</span>
             </div>
-            
-            <ul class="nav-menu">
-                <li class="nav-item active" data-section="dashboard"><a href="#dashboard">Dashboard</a></li>
-                <li class="nav-item" data-section="reports"><a href="#reports">Manage Reports</a></li>
-                <li class="nav-item" data-section="social"><a href="#social">Social Insights</a></li>
-                <li class="nav-item" data-section="hotspots"><a href="#hotspots">Hotspot Analytics</a></li>
-                <!-- <li class="nav-item" data-section="users"><a href="#users">Users</a></li> -->
-                <li class="nav-item" data-section="official">
-                    <a href="{{ url_for('main.admin_add_official') }}">User Management</a>
-                </li>
+            <button class="sidebar-close" id="sidebarClose">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <ul class="sidebar-menu">
+            <li class="sidebar-item active" data-section="dashboard">
+                <a href="#dashboard" class="sidebar-link">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span class="menu-text">Dashboard</span>
+                </a>
+            </li>
+            <li class="sidebar-item" data-section="reports">
+                <a href="#reports" class="sidebar-link">
+                    <i class="fas fa-clipboard-list"></i>
+                    <span class="menu-text">Manage Reports</span>
+                </a>
+            </li>
+            <li class="sidebar-item" data-section="social">
+                <a href="#social" class="sidebar-link">
+                    <i class="fas fa-hashtag"></i>
+                    <span class="menu-text">Social Insights</span>
+                </a>
+            </li>
+            <li class="sidebar-item" data-section="hotspots">
+                <a href="#hotspots" class="sidebar-link">
+                    <i class="fas fa-fire"></i>
+                    <span class="menu-text">Hotspot Analytics</span>
+                </a>
+            </li>
+            <li class="sidebar-item" data-section="official">
+                <a href="{{ url_for('main.admin_add_official') }}" class="sidebar-link">
+                    <i class="fas fa-user-plus"></i>
+                    <span class="menu-text">User Management</span>
+                </a>
+            </li>
+            <li class="sidebar-item" data-section="settings">
+                <a href="#settings" class="sidebar-link">
+                    <i class="fas fa-cog"></i>
+                    <span class="menu-text">Settings</span>
+                </a>
+            </li>
+        </ul>
+        
+        <div class="sidebar-footer">
+            <div class="user-profile">
+                <div class="user-avatar">
+                    <div class="avatar-3d">
+                        <i class="fas fa-user-shield"></i>
+                    </div>
+                </div>
+                <div class="user-info">
+                    <span class="user-name">Admin User</span>
+                    <span class="user-role">Administrator</span>
+                </div>
+            </div>
+            <div class="sidebar-actions">
+                <a href="{{ url_for('main.admin_profile') }}" class="sidebar-action-btn">
+                    <i class="fas fa-user"></i>
+                </a>
+                <a href="{{ url_for('main.logout') }}" class="sidebar-action-btn logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                </a>
+            </div>
+        </div>
+    </nav>
 
-                <li class="nav-item" data-section="settings"><a href="#settings">Settings</a></li>
-            </ul>
-
-            
-            <div class="nav-user">
-                <div class="user-avatar" id="adminDropdownTrigger">
-                    <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiMwODY1ZDMiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMjAgMjF2LTJhNCA0IDAgMCAwLTQtNEg4YTQgNCAwIDAgMC00IDR2MiI+PC9wYXRoPjxjaXJjbGUgY3g9IjEyIiBjeT0iNyIgcj0iNCI+PC9jaXJjbGU+PC9zdmc+" alt="Admin Avatar">
-                    <span class="admin-badge"><i class="fas fa-shield-alt"></i></span>
-                </div>
-                <div class="dropdown-menu" id="adminDropdown">
-                    <!-- <a href="#"><i class="fas fa-user"></i> Profile</a> -->
-                     <a href="{{ url_for('main.admin_profile') }}"><i class="fas fa-user"></i> Profile</a>
-                    <a href="#"><i class="fas fa-cog"></i> Account Settings</a>
-                    <a href="{{ url_for('main.admin_add_official') }}"><i class="fas fa-user-plus"></i> User Management</a>
-                    <a href="{{ url_for('main.logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+        <!-- Top Header -->
+        <header class="top-header">
+            <div class="header-left">
+                <button class="sidebar-toggle" id="sidebarToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="breadcrumb">
+                    <span>Dashboard</span>
                 </div>
             </div>
             
-            <div class="hamburger" id="adminMenuToggle">
-                <span></span>
-                <span></span>
-                <span></span>
-            </div>
-        </nav>
-    </header>
-
-    <main class="admin-main">
-        <!-- Dashboard Overview Section -->
-        <section id="dashboard" class="admin-section active">
-            <h2>Dashboard Overview</h2>
-            
-             <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-clipboard-list"></i>
-                    </div>
-                    <div class="stat-info">
-                        <h3>Total Reports</h3>
-                        <p class="stat-number" id="total-reports">--</p>
-                        <p class="stat-trend" id="reports-trend">Loading...</p>
-                    </div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-check-circle"></i>
-                    </div>
-                    <div class="stat-info">
-                        <h3>Verified Alerts</h3>
-                        <p class="stat-number" id="verified-alerts">--</p>
-                        <p class="stat-trend" id="verified-trend">Loading...</p>
-                    </div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-fire"></i>
-                    </div>
-                    <div class="stat-info">
-                        <h3>Active Hotspots</h3>
-                        <p class="stat-number" id="active-hotspots">--</p>
-                        <p class="stat-trend" id="hotspots-trend">Loading...</p>
-                    </div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <div class="stat-info">
-                        <h3>Total Users</h3>
-                        <p class="stat-number" id="total-users">--</p>
-                        <p class="stat-trend" id="users-trend">Loading...</p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="dashboard-toolbar">
-                <h3>Quick Actions</h3>
-                <div class="toolbar-actions">
-                    <button class="toolbar-btn"><i class="fas fa-check"></i> Approve Reports</button>
-                    <button class="toolbar-btn"><i class="fas fa-sync"></i> Update Status</button>
-                    <button class="toolbar-btn"><i class="fas fa-flag"></i> Review Flagged</button>
-                    <button class="toolbar-btn"><i class="fas fa-bell"></i> Send Alert</button>
-                </div>
-            </div>
-            
-            <div class="charts-grid">
-                <div class="chart-container">
-                    <h3>Report Trends</h3>
-                    <div class="chart-placeholder">
-                        <i class="fas fa-chart-line"></i>
-                        <p>Report activity visualization</p>
-                    </div>
-                </div>
-                
-                <div class="chart-container">
-                    <h3>Sentiment Analysis</h3>
-                    <div class="chart-placeholder">
-                        <i class="fas fa-chart-pie"></i>
-                        <p>Sentiment distribution</p>
-                    </div>
-                </div>
-                
-                <div class="chart-container">
-                    <h3>User Activity</h3>
-                    <div class="chart-placeholder">
-                        <i class="fas fa-chart-bar"></i>
-                        <p>User engagement metrics</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Manage Reports Section -->
-        <section id="reports" class="admin-section">
-            <div class="section-header">
-                <h2>Manage Reports</h2>
-                <div class="section-actions">
-                    <button class="export-btn"><i class="fas fa-file-csv"></i> Export CSV</button>
-                    <button class="export-btn"><i class="fas fa-file-pdf"></i> Export PDF</button>
-                </div>
-            </div>
-            
-            <div class="filters-container">
-                <div class="filter-group">
-                    <label for="report-location">Location</label>
-                    <select id="report-location">
-                        <option>All Locations</option>
-                        <option>East Coast</option>
-                        <option>West Coast</option>
-                        <option>Andaman Islands</option>
-                        <option>Lakshadweep Islands</option>
-                    </select>
-                </div>
-                
-                <div class="filter-group">
-                    <label for="hazard-type">Hazard Type</label>
-                    <select id="hazard-type">
-                        <option>All Types</option>
-                        <option>Storm</option>
-                        <option>Tsunami</option>
-                        <option>High Waves</option>
-                        <option>Rip Currents</option>
-                    </select>
-                </div>
-                
-                <div class="filter-group">
-                    <label for="status-filter">Status</label>
-                    <select id="status-filter">
-                        <option>All Statuses</option>
-                        <option>Pending</option>
-                        <option>Verified</option>
-                        <option>Rejected</option>
-                        <option>Under Review</option>
-                    </select>
-                </div>
-                
-                <div class="filter-group">
-                    <label for="date-filter">Date Range</label>
-                    <input type="text" id="date-filter" placeholder="Select date range">
-                </div>
-                
-                <button class="apply-filters">Apply Filters</button>
-            </div>
-            
-            <div class="table-container">
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th><input type="checkbox" id="select-all"></th>
-                            <th data-sort="id">Report ID <i class="fas fa-sort"></i></th>
-                            <th data-sort="user">User ID <i class="fas fa-sort"></i></th>
-                            <th data-sort="location">Location <i class="fas fa-sort"></i></th>
-                            <th data-sort="type">Hazard Type <i class="fas fa-sort"></i></th>
-                            <th data-sort="time">Time Submitted <i class="fas fa-sort"></i></th>
-                            <th data-sort="severity">Severity Score <i class="fas fa-sort"></i></th>
-                            <th data-sort="status">Verification Status <i class="fas fa-sort"></i></th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="reports-table-body">
-                        <tr>
-                            <td colspan="9" class="loading-row">Loading reports...</td>
-                        </tr>
-                    </tbody>
-                </table>
-                
-                <div class="table-pagination">
-                    <button class="pagination-btn" disabled><i class="fas fa-chevron-left"></i></button>
-                    <button class="pagination-btn active">1</button>
-                    <button class="pagination-btn">2</button>
-                    <button class="pagination-btn">3</button>
-                    <button class="pagination-btn"><i class="fas fa-chevron-right"></i></button>
-                    <span class="pagination-info">Loading reports data...</span>
-                </div>
-            </div>
-        </section>
-
-        <!-- Social Media Insights Section -->
-        <section id="social" class="admin-section">
-            <h2>Social Media Insights</h2>
-            
-            <div class="social-controls">
-                <div class="search-bar">
-                    <input type="text" placeholder="Search keywords, hashtags, or users...">
-                    <button><i class="fas fa-search"></i></button>
-                </div>
-                <div class="time-filter">
-                    <select>
-                        <option>Last 24 hours</option>
-                        <option>Last 7 days</option>
-                        <option>Last 30 days</option>
-                        <option>Custom range</option>
-                    </select>
-                </div>
-            </div>
-            
-            <div class="social-grid">
-                <div class="social-card">
-                    <h3>Trending Keywords</h3>
-                    <div class="tag-cloud">
-                        <span class="tag-size-3">#TsunamiWarning</span>
-                        <span class="tag-size-2">#HighTides</span>
-                        <span class="tag-size-1">#CycloneAlert</span>
-                        <span class="tag-size-2">#BeachClosure</span>
-                        <span class="tag-size-1">#RipCurrents</span>
-                        <span class="tag-size-3">#StormSurge</span>
-                        <span class="tag-size-2">#CoastalSafety</span>
-                        <span class="tag-size-1">#Monsoon2023</span>
-                    </div>
-                </div>
-                
-                <div class="social-card">
-                    <h3>Sentiment Analysis</h3>
-                    <div class="sentiment-chart">
-                        <div class="sentiment-bar positive" style="width: 65%">
-                            <span>Positive (65%)</span>
-                        </div>
-                        <div class="sentiment-bar neutral" style="width: 20%">
-                            <span>Neutral (20%)</span>
-                        </div>
-                        <div class="sentiment-bar negative" style="width: 15%">
-                            <span>Negative (15%)</span>
-                        </div>
-                    </div>
-                    <div class="sentiment-stats">
-                        <div class="sentiment-stat">
-                            <span class="stat-label">Positive</span>
-                            <span class="stat-value">65%</span>
-                        </div>
-                        <div class="sentiment-stat">
-                            <span class="stat-label">Neutral</span>
-                            <span class="stat-value">20%</span>
-                        </div>
-                        <div class="sentiment-stat">
-                            <span class="stat-label">Negative</span>
-                            <span class="stat-value">15%</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="social-card">
-                    <h3>Recent Social Posts</h3>
-                    <div class="post-list">
-                        <div class="social-post">
-                            <div class="post-meta">
-                                <span class="post-user">@CoastalObserver</span>
-                                <span class="post-time">2 hours ago</span>
-                                <span class="post-sentiment positive"><i class="fas fa-smile"></i></span>
+            <div class="header-right">
+                <div class="header-actions">
+                    <button class="header-btn notification-btn">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge">3</span>
+                    </button>
+                    <button class="header-btn fullscreen-btn">
+                        <i class="fas fa-expand"></i>
+                    </button>
+                    <div class="user-dropdown">
+                        <button class="user-menu-btn" id="userMenuBtn">
+                            <div class="user-avatar-sm">
+                                <i class="fas fa-user-shield"></i>
                             </div>
-                            <p class="post-content">Unusually high waves at Marina Beach. Everyone advised to stay away from water today. #HighTides #Chennai</p>
-                            <div class="post-actions">
-                                <button class="post-btn view"><i class="fas fa-eye"></i> View</button>
-                                <button class="post-btn flag"><i class="fas fa-flag"></i> Flag</button>
+                            <span>Admin</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="user-dropdown-menu" id="userDropdown">
+                            <a href="{{ url_for('main.admin_profile') }}" class="dropdown-item">
+                                <i class="fas fa-user"></i>
+                                <span>Profile</span>
+                            </a>
+                            <a href="#" class="dropdown-item">
+                                <i class="fas fa-cog"></i>
+                                <span>Settings</span>
+                            </a>
+                            <a href="{{ url_for('main.admin_add_official') }}" class="dropdown-item">
+                                <i class="fas fa-user-plus"></i>
+                                <span>User Management</span>
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <a href="{{ url_for('main.logout') }}" class="dropdown-item logout">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <span>Logout</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="content-area">
+            <!-- Dashboard Overview Section -->
+            <section id="dashboard" class="admin-section active">
+                <div class="section-header">
+                    <h1 class="section-title">Dashboard Overview</h1>
+                    <div class="section-actions">
+                        <!-- <button class="action-btn primary">
+                            <i class="fas fa-plus"></i>
+                            <span>New Report</span>
+                        </button> -->
+                        <!-- <button class="action-btn secondary">
+                            <i class="fas fa-sync"></i>
+                            <span>Refresh</span>
+                        </button> -->
+                    </div>
+                </div>
+                
+                <!-- Stats Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-card-inner">
+                            <div class="stat-card-front">
+                                <div class="stat-icon">
+                                    <i class="fas fa-clipboard-list"></i>
+                                </div>
+                                <div class="stat-content">
+                                    <h3 class="stat-title">Total Reports</h3>
+                                    <p class="stat-number" id="total-reports">--</p>
+                                    <div class="stat-trend" id="reports-trend">
+                                        <i class="fas fa-arrow-up"></i>
+                                        <span>12% this week</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="stat-card-back">
+                                <div class="back-content">
+                                    <h4>Report Details</h4>
+                                    <p>View detailed analysis of all reports</p>
+                                    <button class="card-action-btn">View Details</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-card-inner">
+                            <div class="stat-card-front">
+                                <div class="stat-icon verified">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                                <div class="stat-content">
+                                    <h3 class="stat-title">Verified Alerts</h3>
+                                    <p class="stat-number" id="verified-alerts">--</p>
+                                    <div class="stat-trend" id="verified-trend">
+                                        <i class="fas fa-arrow-up"></i>
+                                        <span>8% this week</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="stat-card-back">
+                                <div class="back-content">
+                                    <h4>Verified Alerts</h4>
+                                    <p>Manage verified hazard alerts</p>
+                                    <button class="card-action-btn">Manage Alerts</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- <div class="stat-card">
+                        <div class="stat-card-inner">
+                            <div class="stat-card-front">
+                                <div class="stat-icon warning">
+                                    <i class="fas fa-fire"></i>
+                                </div>
+                                <div class="stat-content">
+                                    <h3 class="stat-title">Active Hotspots</h3>
+                                    <p class="stat-number" id="active-hotspots">--</p>
+                                    <div class="stat-trend" id="hotspots-trend">
+                                        <i class="fas fa-minus"></i>
+                                        <span>No change</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="stat-card-back">
+                                <div class="back-content">
+                                    <h4>Hotspot Analysis</h4>
+                                    <p>Analyze active hazard hotspots</p>
+                                    <button class="card-action-btn">View Analysis</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div> -->
+                    
+                    <div class="stat-card">
+                        <div class="stat-card-inner">
+                            <div class="stat-card-front">
+                                <div class="stat-icon users">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <div class="stat-content">
+                                    <h3 class="stat-title">Total Users</h3>
+                                    <p class="stat-number" id="total-users">--</p>
+                                    <div class="stat-trend" id="users-trend">
+                                        <i class="fas fa-arrow-up"></i>
+                                        <span>5% this week</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="stat-card-back">
+                                <div class="back-content">
+                                    <h4>User Management</h4>
+                                    <p>Manage user accounts and permissions</p>
+                                    <button class="card-action-btn">Manage Users</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- offline communiaction  -->
+                 <div class="dashboard-card">
+    <h3>Emergency Communications</h3>
+    <p>Monitor real-time SOS alerts and emergency messages</p>
+    <a href="{{ url_for('main.admin_emergency_monitor') }}" class="btn btn-danger">
+        <i class="fas fa-broadcast-tower"></i>
+        Open Emergency Monitor
+    </a>
+</div>
+
+                
+                <!-- Charts Section -->
+                <div class="charts-section">
+                    <div class="chart-row">
+                        <div class="chart-container large">
+                            <div class="chart-header">
+                                <h3>Report Trends</h3>
+                                <div class="chart-actions">
+                                    <button class="chart-btn active">Weekly</button>
+                                    <!-- <button class="chart-btn">Monthly</button> -->
+                                    <!-- <button class="chart-btn">Yearly</button> -->
+                                </div>
+                            </div>
+                            <div class="chart-wrapper">
+                                <canvas id="trendsChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="chart-row">
+                        <div class="chart-container">
+                            <div class="chart-header">
+                                <h3>Hazard Distribution</h3>
+                            </div>
+                            <div class="chart-wrapper">
+                                <canvas id="hazardsChart"></canvas>
                             </div>
                         </div>
                         
-                        <div class="social-post">
-                            <div class="post-meta">
-                                <span class="post-user">@WeatherEnthusiast</span>
-                                <span class="post-time">5 hours ago</span>
-                                <span class="post-sentiment negative"><i class="fas fa-frown"></i></span>
+                        <div class="chart-container">
+                            <div class="chart-header">
+                                <h3>User Activity</h3>
                             </div>
-                            <p class="post-content">False alarm about tsunami warning circulating. Please verify with official sources before sharing. #FactCheck</p>
-                            <div class="post-actions">
-                                <button class="post-btn view"><i class="fas fa-eye"></i> View</button>
-                                <button class="post-btn flag"><i class="fas fa-flag"></i> Flag</button>
+                            <div class="chart-wrapper">
+                                <canvas id="activityChart"></canvas>
+                            </div>
+                        </div>
+                        
+                        <div class="chart-container">
+                            <div class="chart-header">
+                                <h3>Sentiment Analysis</h3>
+                            </div>
+                            <div class="chart-wrapper">
+                                <canvas id="sentimentChart"></canvas>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </section>
-
-        <!-- Hotspot Analytics Section -->
-        <section id="hotspots" class="admin-section">
-            <h2>Hotspot Analytics</h2>
-            
-            <div class="hotspot-controls">
-                <div class="map-filters">
-                    <div class="filter-group">
-                        <label for="hotspot-date">Date Range</label>
-                        <input type="text" id="hotspot-date" placeholder="Last 7 days">
+                
+                <!-- Quick Actions -->
+                <div class="quick-actions">
+                    <h3>Quick Actions</h3>
+                    <div class="actions-grid">
+                        <button class="action-card">
+                            <div class="action-icon">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <span>Approve Reports</span>
+                        </button>
+                        <button class="action-card">
+                            <div class="action-icon">
+                                <i class="fas fa-sync"></i>
+                            </div>
+                            <span>Update Status</span>
+                        </button>
+                        <button class="action-card">
+                            <div class="action-icon">
+                                <i class="fas fa-flag"></i>
+                            </div>
+                            <span>Review Flagged</span>
+                        </button>
+                        <button class="action-card">
+                            <div class="action-icon">
+                                <i class="fas fa-bell"></i>
+                            </div>
+                            <span>Send Alert</span>
+                        </button>
                     </div>
-                    
+                </div>
+            </section>
+
+            <!-- Manage Reports Section -->
+            <section id="reports" class="admin-section">
+                <div class="section-header">
+                    <h2>Manage Reports</h2>
+                    <div class="section-actions">
+                        <button class="export-btn"><i class="fas fa-file-csv"></i> Export CSV</button>
+                        <button class="export-btn"><i class="fas fa-file-pdf"></i> Export PDF</button>
+                    </div>
+                </div>
+                
+                <div class="filters-container">
                     <div class="filter-group">
-                        <label for="severity-filter">Severity</label>
-                        <select id="severity-filter">
-                            <option>All Levels</option>
-                            <option>Low</option>
-                            <option>Medium</option>
-                            <option>High</option>
-                            <option>Critical</option>
+                        <label for="report-location">Location</label>
+                        <select id="report-location">
+                            <option>All Locations</option>
+                            <option>East Coast</option>
+                            <option>West Coast</option>
+                            <option>Andaman Islands</option>
+                            <option>Lakshadweep Islands</option>
                         </select>
                     </div>
                     
                     <div class="filter-group">
-                        <label for="radius-filter">Location Radius</label>
-                        <select id="radius-filter">
-                            <option>5 km</option>
-                            <option>10 km</option>
-                            <option>25 km</option>
-                            <option>50 km</option>
-                            <option>100 km</option>
+                        <label for="hazard-type">Hazard Type</label>
+                        <select id="hazard-type">
+                            <option>All Types</option>
+                            <option>Storm</option>
+                            <option>Tsunami</option>
+                            <option>High Waves</option>
+                            <option>Rip Currents</option>
                         </select>
                     </div>
-                </div>
-                
-                <div class="layer-toggles">
-                    <label class="toggle-label">
-                        <input type="checkbox" checked> Citizen Reports
-                    </label>
-                    <label class="toggle-label">
-                        <input type="checkbox" checked> Verified Alerts
-                    </label>
-                    <label class="toggle-label">
-                        <input type="checkbox" checked> Social Media Data
-                    </label>
-                </div>
-            </div>
-            
-            <div class="hotspot-content">
-                <div class="map-container">
-                    <div class="map-placeholder">
-                        <i class="fas fa-map-marked-alt"></i>
-                        <p>Interactive Heatmap Loading...</p>
-                        <!-- Heatmap integration would go here -->
-                    </div>
-                </div>
-                
-                <div class="forecast-panel">
-                    <h3>Risk Forecast</h3>
-                    <div class="forecast-chart">
-                        <div class="chart-placeholder">
-                            <i class="fas fa-chart-line"></i>
-                            <p>Risk prediction visualization</p>
-                        </div>
+                    
+                    <div class="filter-group">
+                        <label for="status-filter">Status</label>
+                        <select id="status-filter">
+                            <option>All Statuses</option>
+                            <option>Pending</option>
+                            <option>Verified</option>
+                            <option>Rejected</option>
+                            <option>Under Review</option>
+                        </select>
                     </div>
                     
-                    <div class="forecast-stats">
-                        <div class="forecast-stat">
-                            <span class="stat-label">High Risk Areas</span>
-                            <span class="stat-value">7</span>
-                        </div>
-                        <div class="forecast-stat">
-                            <span class="stat-label">Moderate Risk Areas</span>
-                            <span class="stat-value">12</span>
-                        </div>
-                        <div class="forecast-stat">
-                            <span class="stat-label">Predicted New Hotspots</span>
-                            <span class="stat-value">3</span>
-                        </div>
+                    <div class="filter-group">
+                        <label for="date-filter">Date Range</label>
+                        <input type="text" id="date-filter" placeholder="Select date range">
                     </div>
+                    
+                    <button class="apply-filters">Apply Filters</button>
                 </div>
-            </div>
-        </section>
-
-
-
-        <section class="admin-section" id="add-official">
-            <h2>Add Official</h2>
-            <div class="form-container">
-                <form id="official-form">
-                    <div class="form-group">
-                        <label for="official-name">Full Name</label>
-                        <input type="text" id="official-name" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="official-email">Email</label>
-                        <input type="email" id="official-email" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="official-phone">Phone</label>
-                        <input type="text" id="official-phone" required>
-                    </div>
-                    <button type="submit" class="save-settings">Add Official</button>
-                </form>
-
+                
                 <div class="table-container">
-                    <table class="data-table" id="official-table">
+                    <table class="data-table">
                         <thead>
                             <tr>
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>Phone</th>
-                                <th>Role</th>
+                                <th><input type="checkbox" id="select-all"></th>
+                                <th data-sort="id">Report ID <i class="fas fa-sort"></i></th>
+                                <th data-sort="user">User ID <i class="fas fa-sort"></i></th>
+                                <th data-sort="location">Location <i class="fas fa-sort"></i></th>
+                                <th data-sort="type">Hazard Type <i class="fas fa-sort"></i></th>
+                                <th data-sort="time">Time Submitted <i class="fas fa-sort"></i></th>
+                                <th data-sort="severity">Severity Score <i class="fas fa-sort"></i></th>
+                                <th data-sort="status">Verification Status <i class="fas fa-sort"></i></th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <!-- Officials will be added here dynamically -->
+                        <tbody id="reports-table-body">
+                            <tr>
+                                <td colspan="9" class="loading-row">Loading reports...</td>
+                            </tr>
                         </tbody>
                     </table>
+                    
+                    <div class="table-pagination">
+                        <button class="pagination-btn" disabled><i class="fas fa-chevron-left"></i></button>
+                        <button class="pagination-btn active">1</button>
+                        <button class="pagination-btn">2</button>
+                        <button class="pagination-btn">3</button>
+                        <button class="pagination-btn"><i class="fas fa-chevron-right"></i></button>
+                        <span class="pagination-info">Loading reports data...</span>
+                    </div>
                 </div>
-            </div>
-        </section>
+            </section>
 
-
-        <!-- Settings Section -->
-        <section id="settings" class="admin-section">
-            <h2>System Settings</h2>
-            
-            <div class="settings-tabs">
-                <div class="tab-headers">
-                    <button class="tab-header active" data-tab="alert-settings">Alert Settings</button>
-                    <button class="tab-header" data-tab="report-categories">Report Categories</button>
-                    <button class="tab-header" data-tab="languages">Languages</button>
-                    <button class="tab-header" data-tab="api-integration">API Integration</button>
-                    <button class="tab-header" data-tab="security">Security</button>
-                    <button class="tab-header" data-tab="backup">Backup & Restore</button>
-                </div>
+            <!-- Social Media Insights Section -->
+            <section id="social" class="admin-section">
+                <h2>Social Media Insights</h2>
                 
-                <div class="tab-content active" id="alert-settings">
-                    <h3>Alert Threshold Configuration</h3>
-                    
-                    <div class="setting-group">
-                        <label for="high-risk-threshold">High Risk Threshold</label>
-                        <input type="range" id="high-risk-threshold" min="0" max="100" value="80">
-                        <span class="threshold-value">80%</span>
-                        <p class="setting-description">Reports with confidence scores above this value will trigger high-priority alerts.</p>
+                <div class="social-controls">
+                    <div class="search-bar">
+                        <input type="text" placeholder="Search keywords, hashtags, or users...">
+                        <button><i class="fas fa-search"></i></button>
                     </div>
-                    
-                    <div class="setting-group">
-                        <label for="medium-risk-threshold">Medium Risk Threshold</label>
-                        <input type="range" id="medium-risk-threshold" min="0" max="100" value="60">
-                        <span class="threshold-value">60%</span>
-                        <p class="setting-description">Reports with confidence scores between medium and high thresholds will trigger standard alerts.</p>
-                    </div>
-                    
-                    <div class="setting-group">
-                        <label for="alert-cooldown">Alert Cooldown Period (minutes)</label>
-                        <input type="number" id="alert-cooldown" value="30" min="5" max="240">
-                        <p class="setting-description">Minimum time between alerts for the same hazard type in the same location.</p>
-                    </div>
-                    
-                    <div class="setting-group">
-                        <label for="alert-channels">Alert Distribution Channels</label>
-                        <div class="checkbox-group">
-                            <label><input type="checkbox" checked> Push Notifications</label>
-                            <label><input type="checkbox" checked> Email</label>
-                            <label><input type="checkbox" checked> SMS</label>
-                            <label><input type="checkbox"> Social Media</label>
-                        </div>
-                    </div>
-                    
-                    <button class="save-settings">Save Alert Settings</button>
-                </div>
-                
-                <div class="tab-content" id="report-categories">
-                    <h3>Report Category Management</h3>
-                    <p>Configure the types of hazards and reports that users can submit.</p>
-                    <!-- Content for report categories tab -->
-                </div>
-                
-                <div class="tab-content" id="languages">
-                    <h3>Multilingual Support</h3>
-                    <p>Configure supported languages for the platform.</p>
-                    <!-- Content for languages tab -->
-                </div>
-                
-                <div class="tab-content" id="api-integration">
-                    <h3>API Integration Settings</h3>
-                    <p>Manage integration with external services and APIs.</p>
-                    <!-- Content for API integration tab -->
-                </div>
-                
-                <div class="tab-content" id="security">
-                    <h3>Security Settings</h3>
-                    
-                    <div class="setting-group">
-                        <label for="two-factor">Two-Factor Authentication</label>
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="two-factor" checked>
-                            <span class="slider"></span>
-                        </label>
-                        <p class="setting-description">Require two-factor authentication for all admin accounts.</p>
-                    </div>
-                    
-                    <div class="setting-group">
-                        <label for="session-timeout">Session Timeout (minutes)</label>
-                        <input type="number" id="session-timeout" value="60" min="15" max="480">
-                        <p class="setting-description">Automatically log out users after period of inactivity.</p>
-                    </div>
-                    
-                    <div class="setting-group">
-                        <label for="password-policy">Password Policy</label>
-                        <select id="password-policy">
-                            <option>Standard (8+ characters)</option>
-                            <option>Strong (12+ characters with complexity)</option>
-                            <option>Very Strong (16+ characters with complexity)</option>
+                    <div class="time-filter">
+                        <select>
+                            <option>Last 24 hours</option>
+                            <option>Last 7 days</option>
+                            <option>Last 30 days</option>
+                            <option>Custom range</option>
                         </select>
                     </div>
-                    
-                    <div class="setting-group">
-                        <label for="access-logging">Access Logging</label>
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="access-logging" checked>
-                            <span class="slider"></span>
-                        </label>
-                        <p class="setting-description">Log all access to sensitive administrative functions.</p>
-                    </div>
-                    
-                    <button class="save-settings">Save Security Settings</button>
                 </div>
                 
-                <div class="tab-content" id="backup">
-                    <h3>Backup & Restore</h3>
-                    
-                    <div class="backup-options">
-                        <div class="backup-card">
-                            <i class="fas fa-download"></i>
-                            <h4>Create Backup</h4>
-                            <p>Generate a complete backup of system data and settings.</p>
-                            <button class="backup-btn">Backup Now</button>
+                <div class="social-grid">
+                    <div class="social-card">
+                        <h3>Trending Keywords</h3>
+                        <div class="tag-cloud">
+                            <span class="tag-size-3">#TsunamiWarning</span>
+                            <span class="tag-size-2">#HighTides</span>
+                            <span class="tag-size-1">#CycloneAlert</span>
+                            <span class="tag-size-2">#BeachClosure</span>
+                            <span class="tag-size-1">#RipCurrents</span>
+                            <span class="tag-size-3">#StormSurge</span>
+                            <span class="tag-size-2">#CoastalSafety</span>
+                            <span class="tag-size-1">#Monsoon2023</span>
                         </div>
-                        
-                        <div class="backup-card">
-                            <i class="fas fa-upload"></i>
-                            <h4>Restore Backup</h4>
-                            <p>Restore system from a previously created backup file.</p>
-                            <div class="restore-controls">
-                                <input type="file" id="backup-file" accept=".json,.backup">
-                                <button class="restore-btn">Restore</button>
+                    </div>
+                    
+                    <div class="social-card">
+                        <h3>Sentiment Analysis</h3>
+                        <div class="chart-wrapper">
+                            <canvas id="sentimentChartSocial"></canvas>
+                        </div>
+                        <div class="sentiment-stats">
+                            <div class="sentiment-stat">
+                                <span class="stat-label">Positive</span>
+                                <span class="stat-value">65%</span>
+                            </div>
+                            <div class="sentiment-stat">
+                                <span class="stat-label">Neutral</span>
+                                <span class="stat-value">20%</span>
+                            </div>
+                            <div class="sentiment-stat">
+                                <span class="stat-label">Negative</span>
+                                <span class="stat-value">15%</span>
                             </div>
                         </div>
+                    </div>
+                    
+                    <div class="social-card">
+                        <h3>Recent Social Posts</h3>
+                        <div class="post-list">
+                            <div class="social-post">
+                                <div class="post-meta">
+                                    <span class="post-user">@CoastalObserver</span>
+                                    <span class="post-time">2 hours ago</span>
+                                    <span class="post-sentiment positive"><i class="fas fa-smile"></i></span>
+                                </div>
+                                <p class="post-content">Unusually high waves at Marina Beach. Everyone advised to stay away from water today. #HighTides #Chennai</p>
+                                <div class="post-actions">
+                                    <button class="post-btn view"><i class="fas fa-eye"></i> View</button>
+                                    <button class="post-btn flag"><i class="fas fa-flag"></i> Flag</button>
+                                </div>
+                            </div>
+                            
+                            <div class="social-post">
+                                <div class="post-meta">
+                                    <span class="post-user">@WeatherEnthusiast</span>
+                                    <span class="post-time">5 hours ago</span>
+                                    <span class="post-sentiment negative"><i class="fas fa-frown"></i></span>
+                                </div>
+                                <p class="post-content">False alarm about tsunami warning circulating. Please verify with official sources before sharing. #FactCheck</p>
+                                <div class="post-actions">
+                                    <button class="post-btn view"><i class="fas fa-eye"></i> View</button>
+                                    <button class="post-btn flag"><i class="fas fa-flag"></i> Flag</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Hotspot Analytics Section -->
+            <section id="hotspots" class="admin-section">
+                <h2>Hotspot Analytics</h2>
+                
+                <div class="hotspot-controls">
+                    <div class="map-filters">
+                        <div class="filter-group">
+                            <label for="hotspot-date">Date Range</label>
+                            <input type="text" id="hotspot-date" placeholder="Last 7 days">
+                        </div>
                         
-                        <div class="backup-card">
-                            <i class="fas fa-history"></i>
-                            <h4>Backup Schedule</h4>
-                            <p>Configure automatic backup schedules.</p>
-                            <select id="backup-schedule">
-                                <option>Daily</option>
-                                <option>Weekly</option>
-                                <option>Monthly</option>
-                                <option disabled>Custom</option>
+                        <div class="filter-group">
+                            <label for="severity-filter">Severity</label>
+                            <select id="severity-filter">
+                                <option>All Levels</option>
+                                <option>Low</option>
+                                <option>Medium</option>
+                                <option>High</option>
+                                <option>Critical</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="radius-filter">Location Radius</label>
+                            <select id="radius-filter">
+                                <option>5 km</option>
+                                <option>10 km</option>
+                                <option>25 km</option>
+                                <option>50 km</option>
+                                <option>100 km</option>
                             </select>
                         </div>
                     </div>
                     
-                    <div class="backup-history">
-                        <h4>Recent Backups</h4>
-                        <table class="backup-table">
+                    <div class="layer-toggles">
+                        <label class="toggle-label">
+                            <input type="checkbox" checked> Citizen Reports
+                        </label>
+                        <label class="toggle-label">
+                            <input type="checkbox" checked> Verified Alerts
+                        </label>
+                        <label class="toggle-label">
+                            <input type="checkbox" checked> Social Media Data
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="hotspot-content">
+                    <div class="map-container">
+                        <div class="map-visualization">
+                            <canvas id="hotspotMap"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="forecast-panel">
+                        <h3>Risk Forecast</h3>
+                        <div class="chart-wrapper">
+                            <canvas id="riskForecastChart"></canvas>
+                        </div>
+                        
+                        <div class="forecast-stats">
+                            <div class="forecast-stat">
+                                <span class="stat-label">High Risk Areas</span>
+                                <span class="stat-value">7</span>
+                            </div>
+                            <div class="forecast-stat">
+                                <span class="stat-label">Moderate Risk Areas</span>
+                                <span class="stat-value">12</span>
+                            </div>
+                            <div class="forecast-stat">
+                                <span class="stat-label">Predicted New Hotspots</span>
+                                <span class="stat-value">3</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Add Official Section -->
+            <section class="admin-section" id="official">
+                <h2>Add Official</h2>
+                <div class="form-container">
+                    <form id="official-form">
+                        <div class="form-group">
+                            <label for="official-name">Full Name</label>
+                            <input type="text" id="official-name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="official-email">Email</label>
+                            <input type="email" id="official-email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="official-phone">Phone</label>
+                            <input type="text" id="official-phone" required>
+                        </div>
+                        <button type="submit" class="save-settings">Add Official</button>
+                    </form>
+
+                    <div class="table-container">
+                        <table class="data-table" id="official-table">
                             <thead>
                                 <tr>
-                                    <th>Date</th>
-                                    <th>Type</th>
-                                    <th>Size</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Phone</th>
+                                    <th>Role</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td>2023-10-15 02:00</td>
-                                    <td>Automatic</td>
-                                    <td>4.7 MB</td>
-                                    <td><span class="status completed">Completed</span></td>
-                                    <td>
-                                        <button class="action-btn download"><i class="fas fa-download"></i></button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>2023-10-14 02:00</td>
-                                    <td>Automatic</td>
-                                    <td>4.6 MB</td>
-                                    <td><span class="status completed">Completed</span></td>
-                                    <td>
-                                        <button class="action-btn download"><i class="fas fa-download"></i></button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>2023-10-08 14:30</td>
-                                    <td>Manual</td>
-                                    <td>4.5 MB</td>
-                                    <td><span class="status completed">Completed</span></td>
-                                    <td>
-                                        <button class="action-btn download"><i class="fas fa-download"></i></button>
-                                    </td>
-                                </tr>
+                                <!-- Officials will be added here dynamically -->
                             </tbody>
                         </table>
                     </div>
                 </div>
-            </div>
-        </section>
+            </section>
 
-        <!-- AI Tools Panel (Fixed at bottom) -->
+            <!-- Settings Section -->
+            <section id="settings" class="admin-section">
+                <h2>System Settings</h2>
+                
+                <div class="settings-tabs">
+                    <div class="tab-headers">
+                        <button class="tab-header active" data-tab="alert-settings">Alert Settings</button>
+                        <button class="tab-header" data-tab="report-categories">Report Categories</button>
+                        <button class="tab-header" data-tab="languages">Languages</button>
+                        <button class="tab-header" data-tab="api-integration">API Integration</button>
+                        <button class="tab-header" data-tab="security">Security</button>
+                        <button class="tab-header" data-tab="backup">Backup & Restore</button>
+                    </div>
+                    
+                    <div class="tab-content active" id="alert-settings">
+                        <h3>Alert Threshold Configuration</h3>
+                        
+                        <div class="setting-group">
+                            <label for="high-risk-threshold">High Risk Threshold</label>
+                            <input type="range" id="high-risk-threshold" min="0" max="100" value="80">
+                            <span class="threshold-value">80%</span>
+                            <p class="setting-description">Reports with confidence scores above this value will trigger high-priority alerts.</p>
+                        </div>
+                        
+                        <div class="setting-group">
+                            <label for="medium-risk-threshold">Medium Risk Threshold</label>
+                            <input type="range" id="medium-risk-threshold" min="0" max="100" value="60">
+                            <span class="threshold-value">60%</span>
+                            <p class="setting-description">Reports with confidence scores between medium and high thresholds will trigger standard alerts.</p>
+                        </div>
+                        
+                        <div class="setting-group">
+                            <label for="alert-cooldown">Alert Cooldown Period (minutes)</label>
+                            <input type="number" id="alert-cooldown" value="30" min="5" max="240">
+                            <p class="setting-description">Minimum time between alerts for the same hazard type in the same location.</p>
+                        </div>
+                        
+                        <div class="setting-group">
+                            <label for="alert-channels">Alert Distribution Channels</label>
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" checked> Push Notifications</label>
+                                <label><input type="checkbox" checked> Email</label>
+                                <label><input type="checkbox" checked> SMS</label>
+                                <label><input type="checkbox"> Social Media</label>
+                            </div>
+                        </div>
+                        
+                        <button class="save-settings">Save Alert Settings</button>
+                    </div>
+                    
+                    <div class="tab-content" id="report-categories">
+                        <h3>Report Category Management</h3>
+                        <p>Configure the types of hazards and reports that users can submit.</p>
+                        <!-- Content for report categories tab -->
+                    </div>
+                    
+                    <div class="tab-content" id="languages">
+                        <h3>Multilingual Support</h3>
+                        <p>Configure supported languages for the platform.</p>
+                        <!-- Content for languages tab -->
+                    </div>
+                    
+                    <div class="tab-content" id="api-integration">
+                        <h3>API Integration Settings</h3>
+                        <p>Manage integration with external services and APIs.</p>
+                        <!-- Content for API integration tab -->
+                    </div>
+                    
+                    <div class="tab-content" id="security">
+                        <h3>Security Settings</h3>
+                        
+                        <div class="setting-group">
+                            <label for="two-factor">Two-Factor Authentication</label>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="two-factor" checked>
+                                <span class="slider"></span>
+                            </label>
+                            <p class="setting-description">Require two-factor authentication for all admin accounts.</p>
+                        </div>
+                        
+                        <div class="setting-group">
+                            <label for="session-timeout">Session Timeout (minutes)</label>
+                            <input type="number" id="session-timeout" value="60" min="15" max="480">
+                            <p class="setting-description">Automatically log out users after period of inactivity.</p>
+                        </div>
+                        
+                        <div class="setting-group">
+                            <label for="password-policy">Password Policy</label>
+                            <select id="password-policy">
+                                <option>Standard (8+ characters)</option>
+                                <option>Strong (12+ characters with complexity)</option>
+                                <option>Very Strong (16+ characters with complexity)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="setting-group">
+                            <label for="access-logging">Access Logging</label>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="access-logging" checked>
+                                <span class="slider"></span>
+                            </label>
+                            <p class="setting-description">Log all access to sensitive administrative functions.</p>
+                        </div>
+                        
+                        <button class="save-settings">Save Security Settings</button>
+                    </div>
+                    
+                    <div class="tab-content" id="backup">
+                        <h3>Backup & Restore</h3>
+                        
+                        <div class="backup-options">
+                            <div class="backup-card">
+                                <i class="fas fa-download"></i>
+                                <h4>Create Backup</h4>
+                                <p>Generate a complete backup of system data and settings.</p>
+                                <button class="backup-btn">Backup Now</button>
+                            </div>
+                            
+                            <div class="backup-card">
+                                <i class="fas fa-upload"></i>
+                                <h4>Restore Backup</h4>
+                                <p>Restore system from a previously created backup file.</p>
+                                <div class="restore-controls">
+                                    <input type="file" id="backup-file" accept=".json,.backup">
+                                    <button class="restore-btn">Restore</button>
+                                </div>
+                            </div>
+                            
+                            <div class="backup-card">
+                                <i class="fas fa-history"></i>
+                                <h4>Backup Schedule</h4>
+                                <p>Configure automatic backup schedules.</p>
+                                <select id="backup-schedule">
+                                    <option>Daily</option>
+                                    <option>Weekly</option>
+                                    <option>Monthly</option>
+                                    <option disabled>Custom</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="backup-history">
+                            <h4>Recent Backups</h4>
+                            <table class="backup-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Type</th>
+                                        <th>Size</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>2023-10-15 02:00</td>
+                                        <td>Automatic</td>
+                                        <td>4.7 MB</td>
+                                        <td><span class="status completed">Completed</span></td>
+                                        <td>
+                                            <button class="action-btn download"><i class="fas fa-download"></i></button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>2023-10-14 02:00</td>
+                                        <td>Automatic</td>
+                                        <td>4.6 MB</td>
+                                        <td><span class="status completed">Completed</span></td>
+                                        <td>
+                                            <button class="action-btn download"><i class="fas fa-download"></i></button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>2023-10-08 14:30</td>
+                                        <td>Manual</td>
+                                        <td>4.5 MB</td>
+                                        <td><span class="status completed">Completed</span></td>
+                                        <td>
+                                            <button class="action-btn download"><i class="fas fa-download"></i></button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- AI Tools Panel -->
         <div class="ai-tools-panel">
             <div class="ai-tools-header">
                 <h3><i class="fas fa-robot"></i> AI-Driven Tools</h3>
-                <button class="ai-panel-toggle"><i class="fas fa-chevron-up"></i></button>
+                <button class="ai-panel-toggle">
+                    <i class="fas fa-chevron-up"></i>
+                </button>
             </div>
-            
             <div class="ai-tools-content">
                 <div class="ai-tool">
                     <div class="ai-tool-info">
@@ -719,53 +920,7 @@
                 </div>
             </div>
         </div>
-    </main>
-
-    <!-- Footer Section -->
-    <footer class="admin-footer">
-        <div class="footer-content">
-            <div class="footer-section">
-                <h4>Ocean Hazard Reporting</h4>
-                <p>Advanced admin dashboard for disaster management professionals</p>
-            </div>
-            
-            <div class="footer-section">
-                <h4>Quick Links</h4>
-                <ul>
-                    <li><a href="#">About</a></li>
-                    <li><a href="#">Contact</a></li>
-                    <li><a href="#">Privacy Policy</a></li>
-                    <li><a href="#">Terms of Use</a></li>
-                </ul>
-            </div>
-            
-            <div class="footer-section">
-                <h4>Connect</h4>
-                <div class="social-icons">
-                    <a href="#"><i class="fab fa-twitter"></i></a>
-                    <a href="#"><i class="fab fa-facebook"></i></a>
-                    <a href="#"><i class="fab fa-linkedin"></i></a>
-                    <a href="#"><i class="fab fa-youtube"></i></a>
-                </div>
-            </div>
-            
-            <div class="footer-section">
-                <h4>Government Partners</h4>
-                <div class="government-logos">
-                    <div class="gov-logo">Ministry of Earth Sciences</div>
-                    <div class="gov-logo">INCOIS</div>
-                    <div class="gov-logo">NDMA</div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="footer-bottom">
-            <p>&copy; 2023 Ocean Hazard Reporting Platform. All rights reserved.</p>
-            <p>Version 2.1.0 | Last updated: October 15, 2023</p>
-        </div>
-        <br><br>
-    </footer>
-    
+    </div>
 
     <script src="{{ url_for('static', filename='js/admin_dashboard.js') }}"></script>
 </body>

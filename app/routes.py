@@ -33,6 +33,13 @@ def emergency_dashboard():
         return redirect(url_for("main.login"))
     return render_template("emergency_dashboard.html")
 
+@main_bp.route("/admin/emergency-monitor")
+def admin_emergency_monitor():
+    """Admin emergency monitoring dashboard"""
+    if session.get("role") != "admin":
+        return redirect(url_for("main.login"))
+    return render_template("admin_emergency_monitor.html")
+
 @main_bp.route("/api/emergency/sos")
 def get_emergency_sos():
     """API endpoint to get all SOS messages"""
@@ -56,6 +63,31 @@ def get_emergency_sos():
         })
     conn.close()
     return jsonify(sos_messages)
+
+@main_bp.route("/api/emergency/messages")
+def get_emergency_messages():
+    """API endpoint to get all messages"""
+    conn = sqlite3.connect('emergency_messages.db')
+    c = conn.cursor()
+    c.execute('''
+        SELECT sender, msg, type, latitude, longitude, timestamp 
+        FROM messages 
+        ORDER BY timestamp DESC
+        LIMIT 100
+    ''')
+    messages = []
+    for row in c.fetchall():
+        messages.append({
+            'sender': row[0],
+            'message': row[1],
+            'type': row[2],
+            'latitude': row[3],
+            'longitude': row[4],
+            'timestamp': row[5],
+            'datetime': datetime.fromtimestamp(row[5]).strftime('%Y-%m-%d %H:%M:%S')
+        })
+    conn.close()
+    return jsonify(messages)
 
 # ---------------- SESSION ROLES ----------------
 

@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emergency Monitor - Admin Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin_emergency_monitor.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="admin-emergency-container">
+        <!-- Header -->
+        <header class="admin-header">
+            <div class="header-content">
+                <a href="{{ url_for('main.admin_dashboard') }}" class="back-btn">
+                    <i class="fas fa-arrow-left"></i>
+                    Back to Dashboard
+                </a>
+                <div class="header-main">
+                    <div class="logo-section">
+                        <div class="logo">🚨</div>
+                        <div class="header-text">
+                            <h1>Emergency Monitoring Center</h1>
+                            <p class="subtitle">Real-time SOS Alerts & Communication Management</p>
+                        </div>
+                    </div>
+                    <div class="admin-controls">
+                        <div class="connection-status">
+                            <span id="connection-indicator" class="connecting"></span>
+                            <span id="connection-text">Connecting...</span>
+                        </div>
+                        <div class="online-users">
+                            <i class="fas fa-users"></i>
+                            <span id="online-count">0</span> online
+                        </div>
+                        <div class="message-stats">
+                            <i class="fas fa-comment"></i>
+                            <span id="total-messages">0</span> messages
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="admin-main-content">
+            <!-- SOS Alerts Panel -->
+            <div class="sos-alerts-panel">
+                <div class="panel-header">
+                    <h3><i class="fas fa-exclamation-triangle"></i> Active SOS Alerts</h3>
+                    <div class="alert-count">
+                        <span id="active-alerts-count">0</span> Active
+                    </div>
+                </div>
+                <div class="panel-actions">
+                    <button class="panel-btn" onclick="markAllAsRead()">
+                        <i class="fas fa-check-double"></i>
+                        Mark All Read
+                    </button>
+                    <button class="panel-btn" onclick="clearSOSAlerts()">
+                        <i class="fas fa-trash"></i>
+                        Clear All
+                    </button>
+                </div>
+                <div id="sos-alerts-container" class="sos-alerts-container">
+                    <div class="no-alerts">
+                        <i class="fas fa-check-circle"></i>
+                        <p>No active SOS alerts</p>
+                        <small>All clear! No emergency alerts at the moment.</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Emergency Chat Panel -->
+            <div class="chat-management-panel">
+                <div class="panel-header">
+                    <h3><i class="fas fa-comments"></i> Emergency Communications</h3>
+                    <div class="chat-controls">
+                        <button class="chat-control-btn" onclick="clearAllChats()" title="Clear Chat">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                        <button class="chat-control-btn" onclick="scrollToBottom()" title="Scroll to Bottom">
+                            <i class="fas fa-arrow-down"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Messages Container - Fixed Height like WhatsApp -->
+                <div class="admin-messages-container">
+                    <div id="admin-messages" class="admin-messages">
+                        <div class="system-message welcome-message">
+                            <div class="system-icon">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <div class="system-content">
+                                <h4>Emergency Monitoring Active</h4>
+                                <p>You are now monitoring all emergency communications. SOS alerts will appear with priority notifications.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Admin Message Input -->
+                <div class="admin-input-section">
+                    <div class="input-container">
+                        <div class="input-wrapper">
+                            <input type="text" id="admin-message-input" placeholder="Send emergency announcement as Admin..." maxlength="500" onkeypress="handleKeyPress(event)">
+                            <div class="input-actions">
+                                <button class="quick-msg-btn" onclick="insertQuickMessage('🚨 Emergency Alert: Please evacuate immediately!')" title="Emergency Alert">
+                                    <i class="fas fa-bell"></i>
+                                </button>
+                                <button class="quick-msg-btn" onclick="insertQuickMessage('📢 Safety Update: Stay indoors and await instructions.')" title="Safety Update">
+                                    <i class="fas fa-info-circle"></i>
+                                </button>
+                                <button onclick="sendAdminMessage()" class="send-btn admin-send">
+                                    <i class="fas fa-paper-plane"></i>
+                                    Send
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="admin-info">
+                        <div class="admin-badge">
+                            <i class="fas fa-user-shield"></i>
+                            <span>Administrator Mode</span>
+                        </div>
+                        <div class="network-status">
+                            <i class="fas fa-broadcast-tower"></i>
+                            <span>Monitoring Network</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions Panel -->
+            <div class="actions-panel">
+                <div class="panel-header">
+                    <h3><i class="fas fa-bolt"></i> Quick Actions</h3>
+                </div>
+                <div class="action-buttons">
+                    <button class="action-btn emergency" onclick="sendEmergencyAlert()">
+                        <div class="action-icon">
+                            <i class="fas fa-bullhorn"></i>
+                        </div>
+                        <div class="action-text">
+                            <span class="action-title">Emergency Alert</span>
+                            <span class="action-desc">Broadcast critical alert</span>
+                        </div>
+                    </button>
+                    <button class="action-btn warning" onclick="sendSafetyUpdate()">
+                        <div class="action-icon">
+                            <i class="fas fa-info-circle"></i>
+                        </div>
+                        <div class="action-text">
+                            <span class="action-title">Safety Update</span>
+                            <span class="action-desc">Send safety instructions</span>
+                        </div>
+                    </button>
+                    <button class="action-btn info" onclick="sendAllClear()">
+                        <div class="action-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="action-text">
+                            <span class="action-title">All Clear</span>
+                            <span class="action-desc">Signal situation normal</span>
+                        </div>
+                    </button>
+                    <button class="action-btn test" onclick="testSOSAlert()">
+                        <div class="action-icon">
+                            <i class="fas fa-vial"></i>
+                        </div>
+                        <div class="action-text">
+                            <span class="action-title">Test Alert</span>
+                            <span class="action-desc">System verification</span>
+                        </div>
+                    </button>
+                </div>
+                
+                <!-- System Status -->
+                <div class="system-status">
+                    <h4>System Status</h4>
+                    <div class="status-items">
+                        <div class="status-item">
+                            <div class="status-indicator connected"></div>
+                            <span>WebSocket Connection</span>
+                        </div>
+                        <div class="status-item">
+                            <div class="status-indicator connected"></div>
+                            <span>Database Access</span>
+                        </div>
+                        <div class="status-item">
+                            <div class="status-indicator connected"></div>
+                            <span>Audio Alerts</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SOS Alert Modal -->
+        <div id="sos-alert-modal" class="sos-alert-modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="emergency-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="modal-title">
+                        <h2>🚨 EMERGENCY SOS ALERT</h2>
+                        <p class="modal-subtitle">Immediate attention required</p>
+                    </div>
+                    <button class="close-modal" onclick="closeSOSModal()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert-details">
+                        <div class="detail-row">
+                            <label><i class="fas fa-user"></i> From:</label>
+                            <span id="modal-sender">Unknown User</span>
+                        </div>
+                        <div class="detail-row">
+                            <label><i class="fas fa-clock"></i> Time:</label>
+                            <span id="modal-time">Just now</span>
+                        </div>
+                        <div class="detail-row">
+                            <label><i class="fas fa-comment"></i> Message:</label>
+                            <span id="modal-message">Emergency assistance needed!</span>
+                        </div>
+                        <div class="detail-row">
+                            <label><i class="fas fa-map-marker-alt"></i> Location:</label>
+                            <span id="modal-location">Acquiring location...</span>
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn-primary" onclick="viewOnMap()">
+                            <i class="fas fa-map-marked-alt"></i>
+                            View on Map
+                        </button>
+                        <button class="btn-secondary" onclick="acknowledgeAlert()">
+                            <i class="fas fa-check"></i>
+                            Acknowledge
+                        </button>
+                        <button class="btn-warning" onclick="contactUser()">
+                            <i class="fas fa-phone"></i>
+                            Contact User
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast Notification -->
+        <div id="toast" class="toast hidden"></div>
+
+        <!-- Loading Overlay -->
+        <div id="loading-overlay" class="loading-overlay hidden">
+            <div class="loading-spinner"></div>
+            <p>Initializing emergency monitoring...</p>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/admin_emergency_monitor.js') }}"></script>
+</body>
+</html>
