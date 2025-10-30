@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ocean Hazard Reporting & Analytics</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/citizen_dashboard.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+</head>
+<body>
+    <!-- Header Section -->
+    <header class="header">
+        <nav class="navbar">
+            <div class="nav-brand">
+                <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="Ocean Hazard Logo" class="logo" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiMwODY1ZDMiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMiAxMmM0LjI0IDAgNy44Mi0yLjU1IDkuNDEtNi4yMkMyMC4xOSAxMiA5LjIyIDEyIDIuMTIgMTJjMCAwIDQuMjQgMCA5LjQxIDYuMjJDMTAuOTIgMjIuNTUgNC4yNCAyNCAyIDEyeiI+PC9wYXRoPjwvc3ZnPg=='">
+                <span>Suraksha</span>
+            </div>
+            
+            <ul class="nav-menu">
+                <li class="nav-item active"><a href="#home">Home</a></li>
+                <li class="nav-item"><a href="#dashboard">Overview</a></li>
+                <li class="nav-item"><a href="#nearest-reports">Reports</a></li>
+                <!-- <li class="nav-item"><a href="{{ url_for('main.citizen_report') }}">Report Hazard</a></li> -->
+                <li class="nav-item"><a href="#hotspots">Hotspots</a></li>
+                <li class="nav-item"><a href="#social-insights">Social Insights</a></li>
+                <li class="nav-item"><a href="#ai_features">AI Features</a></li>
+            </ul>
+            
+            <div class="nav-user">
+                <div class="user-avatar" id="userDropdownTrigger">
+                    <i class="fas fa-user-circle"></i>
+                    <span class="user-name">User Profile</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="dropdown-menu" id="userDropdown">
+                    <a href="{{ url_for('main.citizen_profile') }}"><i class="fas fa-user"></i> Profile</a>
+                    <a href="{{ url_for('main.logout') }}" id="logoutLink"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                </div>
+            </div>
+            
+            <div class="hamburger" id="mobileMenuToggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="hero-content">
+            <h1>Stay Safe. Report Hazards. Save Lives.</h1>
+            <p>Empowering coastal communities with real-time ocean hazard reporting and insights powered by AI.</p>
+            <a href="{{ url_for('main.citizen_report') }}">
+                <button class="cta-button">Report Now</button>
+            </a>
+        </div>
+        <div class="hero-wave">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
+                <path d="M985.66,92.83C906.67,72,823.78,31,743.84,14.19c-82.26-17.34-168.06-16.33-250.45.39-57.84,11.73-114,31.07-172,41.86A600.21,600.21,0,0,1,0,27.35V120H1200V95.8C1132.19,118.92,1055.71,111.31,985.66,92.83Z" class="shape-fill"></path>
+            </svg>
+        </div>
+    </section>
+
+    <!-- Dashboard Stats Section -->
+    <section id="dashboard" class="dashboard-section">
+        <div class="container">
+            <h2 class="section-title">Hazard Overview</h2>
+            
+            <!-- <div class="filter-bar">
+                <div class="filter-group">
+                    <label for="location">Location</label>
+                    <select id="location">
+                        <option>All Regions</option>
+                        <option>East Coast</option>
+                        <option>West Coast</option>
+                        <option>Andaman Islands</option>
+                        <option>Lakshadweep Islands</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Event Type</label>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" checked> Storms</label>
+                        <label><input type="checkbox" checked> Tsunamis</label>
+                        <label><input type="checkbox" checked> High Waves</label>
+                        <label><input type="checkbox" checked> Rip Currents</label>
+                    </div>
+                </div>
+                <div class="filter-group">
+                    <label for="date-range">Date Range</label>
+                    <input type="text" id="date-range" placeholder="Last 7 days">
+                </div>
+                <div class="filter-group">
+                    <label for="source">Source</label>
+                    <select id="source">
+                        <option>All Sources</option>
+                        <option>Official Reports</option>
+                        <option>User Reports</option>
+                        <option>Social Media</option>
+                    </select>
+                </div>
+                <button class="apply-filters-btn">Apply Filters</button>
+            </div> -->
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-clipboard-list"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Total Reports</h3>
+                        <p class="stat-number" id="total-reports">--</p>
+                        <p class="stat-trend" id="reports-trend">Loading...</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon verified">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Verified Alerts</h3>
+                        <p class="stat-number" id="verified-alerts">--</p>
+                        <p class="stat-trend" id="verified-trend">Loading...</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon hotspot">
+                        <i class="fas fa-fire"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Active Hotspots</h3>
+                        <p class="stat-number" id="active-hotspots">--</p>
+                        <p class="stat-trend" id="hotspots-trend">Loading...</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon users">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Total Users</h3>
+                        <p class="stat-number" id="total-users">--</p>
+                        <p class="stat-trend" id="users-trend">Loading...</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div id = "hotspots" class="map-container">
+                <div class="map-header">
+                    <h3>Interactive Hazard Map</h3>
+                    <button class="view-map-btn" onclick="window.location.href='{{ url_for('main.hazard_map') }}'">Explore Full Map</button>
+                </div>
+                
+            
+                <div class="map-container" style="max-width: 640px; margin: 0 auto; cursor: pointer;"
+     onclick="window.location.href='{{ url_for('main.hazard_map') }}'">
+
+                    <!-- Load dotLottie Web Component -->
+                <script
+                    src="https://unpkg.com/@lottiefiles/dotlottie-wc@0.8.1/dist/dotlottie-wc.js"
+                    type="module">
+                </script>
+
+                <!-- Embed Lottie animation -->
+                <dotlottie-wc
+                    src="https://lottie.host/5bc275eb-a475-4e09-bb0e-cc434e1996f9/fhN348BCQP.lottie"
+                    style="width: 100%; height: 360px;"
+                    autoplay
+                    loop>
+                </dotlottie-wc>
+                </div>
+
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Nearest Reports Section -->
+    <section id="nearest-reports" class="reports-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Nearest Reports</h2>
+                <div class="location-selector">
+                    <button class="location-btn active">
+                        <i class="fas fa-location-arrow"></i>
+                        Auto-Detect
+                    </button>
+                    <button class="location-btn">
+                        <i class="fas fa-map-marker-alt"></i>
+                        Select Location
+                    </button>
+                </div>
+            </div>
+            
+            <div class="reports-carousel">
+                <div class="report-card">
+                    <div class="report-type storm">
+                        <i class="fas fa-wind"></i>
+                        <span>Storm</span>
+                    </div>
+                    <div class="report-content">
+                        <h3>Cyclone Alert</h3>
+                        <p class="report-location"><i class="fas fa-map-marker-alt"></i> Chennai Coast</p>
+                        <p class="report-time"><i class="fas fa-clock"></i> 2 hours ago</p>
+                        <div class="severity high">High Severity</div>
+                    </div>
+                    <div class="report-status verified">
+                        <i class="fas fa-check-circle"></i> Verified
+                    </div>
+                </div>
+                
+                <div class="report-card">
+                    <div class="report-type wave">
+                        <i class="fas fa-water"></i>
+                        <span>High Waves</span>
+                    </div>
+                    <div class="report-content">
+                        <h3>High Wave Warning</h3>
+                        <p class="report-location"><i class="fas fa-map-marker-alt"></i> Goa Beach</p>
+                        <p class="report-time"><i class="fas fa-clock"></i> 5 hours ago</p>
+                        <div class="severity medium">Medium Severity</div>
+                    </div>
+                    <div class="report-status pending">
+                        <i class="fas fa-clock"></i> Pending
+                    </div>
+                </div>
+                
+                <div class="report-card">
+                    <div class="report-type current">
+                        <i class="fas fa-swimming-pool"></i>
+                        <span>Rip Current</span>
+                    </div>
+                    <div class="report-content">
+                        <h3>Strong Rip Currents</h3>
+                        <p class="report-location"><i class="fas fa-map-marker-alt"></i> Puri Beach</p>
+                        <p class="report-time"><i class="fas fa-clock"></i> 8 hours ago</p>
+                        <div class="severity high">High Severity</div>
+                    </div>
+                    <div class="report-status verified">
+                        <i class="fas fa-check-circle"></i> Verified
+                    </div>
+                </div>
+                
+                <div class="report-card">
+                    <div class="report-type tsunami">
+                        <i class="fas fa-wave-square"></i>
+                        <span>Tsunami</span>
+                    </div>
+                    <div class="report-content">
+                        <h3>Tsunami Advisory</h3>
+                        <p class="report-location"><i class="fas fa-map-marker-alt"></i> Andaman Islands</p>
+                        <p class="report-time"><i class="fas fa-clock"></i> 12 hours ago</p>
+                        <div class="severity critical">Critical Severity</div>
+                    </div>
+                    <div class="report-status verified">
+                        <i class="fas fa-check-circle"></i> Verified
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Replace the existing button code in the Nearest Reports section -->
+            <div class="view-all-container">
+                <a href="{{ url_for('main.citizen_nearest_reports') }}" class="view-all-btn">
+                    <span>View All Reports</span>
+                    <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+
+
+        </div>
+    </section>
+
+    <!-- Quick Access Section -->
+    <section class="quick-access">
+        <div class="container">
+            <h2 class="section-title">Quick Access</h2>
+            <div class="quick-access-grid">
+                <div class="access-card">
+                    <div class="access-icon">
+                        <i class="fas fa-clipboard-list"></i>
+                    </div>
+                    <h3>Submit Observation</h3>
+                    <p>Report a new ocean hazard or observation</p>
+                    <a href="{{ url_for('main.citizen_report') }}" class="access-link">Report Now <i class="fas fa-arrow-right"></i></a>
+                </div>
+                
+                <div class="access-card">
+                    <div class="access-icon">
+                        <i class="fas fa-map-marked-alt"></i>
+                    </div>
+                    <h3>View Hotspots</h3>
+                    <p>See current hazard hotspots on the map</p>
+                    <a href="#hotspots" class="access-link">View Map <i class="fas fa-arrow-right"></i></a>
+                </div>
+                
+                <div class="access-card">
+                    <div class="access-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3>Explore Social Trends</h3>
+                    <p>Analyze social media for hazard patterns</p>
+                    <a href="#social-insights" class="access-link">Explore <i class="fas fa-arrow-right"></i></a>
+                </div>
+                
+                <div class="access-card">
+                    <div class="access-icon">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <h3>View Alerts</h3>
+                    <p>Check active alerts and warnings</p>
+                    <a href="#alerts" class="access-link">View Alerts <i class="fas fa-arrow-right"></i></a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Social Media Insights Section -->
+    <section id="social-insights" class="social-insights">
+        <div class="container">
+            <h2 class="section-title">Social Media Insights</h2>
+            
+            <div class="social-grid">
+                <div class="trending-card">
+                    <h3><i class="fas fa-hashtag"></i> Trending Keywords</h3>
+                    <div class="tag-cloud">
+                        <span class="tag-size-3">#TsunamiWarning</span>
+                        <span class="tag-size-2">#HighTides</span>
+                        <span class="tag-size-3">#CycloneAlert</span>
+                        <span class="tag-size-2">#BeachClosure</span>
+                        <span class="tag-size-1">#RipCurrents</span>
+                        <span class="tag-size-3">#StormSurge</span>
+                        <span class="tag-size-2">#CoastalSafety</span>
+                        <span class="tag-size-1">#Monsoon2023</span>
+                    </div>
+                </div>
+                
+                <div class="posts-card">
+                    <h3><i class="fas fa-comments"></i> Recent Social Posts</h3>
+                    <div class="post-list">
+                        <div class="post">
+                            <div class="post-header">
+                                <span class="user">@CoastalObserver</span>
+                                <span class="time">2 hours ago</span>
+                            </div>
+                            <p class="post-content">Just witnessed unusually high waves at Marina Beach. Everyone advised to stay away from water today. #HighTides #Chennai</p>
+                            <span class="sentiment positive"><i class="fas fa-smile"></i> Helpful</span>
+                        </div>
+                        
+                        <div class="post">
+                            <div class="post-header">
+                                <span class="user">@FishermanRaj</span>
+                                <span class="time">5 hours ago</span>
+                            </div>
+                            <p class="post-content">Strong currents spotted near Rameswaram coast. Fishermen advised to avoid area. #SafetyFirst</p>
+                            <span class="sentiment positive"><i class="fas fa-smile"></i> Informative</span>
+                        </div>
+                        
+                        <div class="post">
+                            <div class="post-header">
+                                <span class="user">@WeatherEnthusiast</span>
+                                <span class="time">Yesterday</span>
+                            </div>
+                            <p class="post-content">False alarm about tsunami warning circulating. Please verify with official sources before sharing. #FactCheck</p>
+                            <span class="sentiment negative"><i class="fas fa-frown"></i> Misinformation</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="engagement-card">
+                    <h3><i class="fas fa-chart-bar"></i> Engagement Trends</h3>
+                    <div class="engagement-graph">
+                        <div class="graph-bar" style="height: 30%"><span>Mon</span></div>
+                        <div class="graph-bar" style="height: 60%"><span>Tue</span></div>
+                        <div class="graph-bar" style="height: 80%"><span>Wed</span></div>
+                        <div class="graph-bar" style="height: 100%"><span>Thu</span></div>
+                        <div class="graph-bar" style="height: 70%"><span>Fri</span></div>
+                        <div class="graph-bar" style="height: 40%"><span>Sat</span></div>
+                        <div class="graph-bar" style="height: 20%"><span>Sun</span></div>
+                    </div>
+                    <p class="graph-caption">Social media engagement for ocean hazard topics</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- AI Features Section -->
+    <section id="ai_features" class="ai-features">
+        <div class="container">
+            <h2 class="section-title">AI-Driven Features</h2>
+            <p class="section-subtitle">Advanced technology for accurate hazard detection and response</p>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <h3>Report Verification</h3>
+                    <p>AI algorithms cross-validate reports with sensor data and social media to verify hazards.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-fire"></i>
+                    </div>
+                    <h3>Dynamic Hotspot Generation</h3>
+                    <p>Real-time identification of emerging hazard zones based on multiple data sources.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <h3>Misinformation Detection</h3>
+                    <p>Identify and flag false reports or misinformation to prevent panic.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-language"></i>
+                    </div>
+                    <h3>Multilingual Support</h3>
+                    <p>Process reports and alerts in multiple regional languages for wider accessibility.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer Section -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Ocean Hazard Reporting & Analytics</h4>
+                    <p>A platform for coastal communities to report and stay informed about ocean-related hazards.</p>
+                    <div class="social-icons">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-linkedin"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#">Contact</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Use</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Partners</h4>
+                    <div class="partner-logos">
+                        <div class="partner-logo">Ministry of Earth Sciences</div>
+                        <div class="partner-logo">INCOIS</div>
+                        <div class="partner-logo">NDMA</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2023 Ocean Hazard Reporting & Analytics. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript Files -->
+    <script src="{{ url_for('static', filename='js/citizen_dashboard.js') }}"></script>
+</body>
+</html>

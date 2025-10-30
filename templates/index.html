@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ocean Hazard Reporting - Stay Safe</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header Section -->
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <i class="fas fa-water"></i>
+                <span>Suraksha</span>
+            </div>
+            <nav class="nav">
+                <ul>
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#how-it-works">How It Works</a></li>
+                    <li><a href="#alerts">Alerts</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+            </nav>
+            <div class="auth-buttons">
+                 <a href="{{ url_for('main.login') }}" class="btn btn-outline">Login</a>
+                <a href="{{ url_for('main.signup') }}" class="btn btn-primary">Sign Up</a>
+            </div>
+            <div class="mobile-menu-btn">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </header>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu">
+        <div class="mobile-menu-content">
+            <a href="#home">Home</a>
+            <a href="#about">About</a>
+            <a href="#how-it-works">How It Works</a>
+            <a href="#alerts">Alerts</a>
+            <a href="#contact">Contact</a>
+            <div class="mobile-auth">
+                <a href="{{ url_for('main.login') }}" class="btn btn-outline">Login</a>
+                <a href="{{ url_for('main.signup') }}" class="btn btn-primary">Sign Up</a>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Welcome/Hero Section -->
+    <section class="hero" id="home">
+        <div class="hero-background">
+            <div class="hero-overlay"></div>
+        </div>
+        <div class="container">
+            <div class="hero-content">
+                <h1>Protect Your Community From Ocean Hazards</h1>
+                <p>Report unusual sea activity and get help quickly with our simple, accessible platform</p>
+                <div class="hero-buttons">
+                    <a href="#report" class="btn btn-large btn-alert">
+                        <i class="fas fa-exclamation-circle"></i>
+                        Report Hazard
+                    </a>
+                    <a href="#alerts" class="btn btn-large btn-info">
+                        <i class="fas fa-bell"></i>
+                        View Alerts
+                    </a>
+                </div>
+                <div class="hero-icons">
+                    <div class="icon-item">
+                        <i class="fas fa-wave-square"></i>
+                        <span>Wave Reports</span>
+                    </div>
+                    <div class="icon-item">
+                        <i class="fas fa-users"></i>
+                        <span>Community Safety</span>
+                    </div>
+                    <div class="icon-item">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Rapid Response</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats">
+        <div class="container">
+            <div class="stat-item">
+                <h3>2,500+</h3>
+                <p>Hazards Reported</p>
+            </div>
+            <div class="stat-item">
+                <h3>15,000+</h3>
+                <p>Lives Protected</p>
+            </div>
+            <div class="stat-item">
+                <h3>120+</h3>
+                <p>Coastal Communities</p>
+            </div>
+            <div class="stat-item">
+                <h3>30 min</h3>
+                <p>Average Response Time</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="about" id="about">
+        <div class="container">
+            <h2>About OceanGuard</h2>
+            <p class="about-description">Our platform helps coastal communities report high waves, flooding, and dangerous ocean activity. Even with limited literacy, you can easily share photos or videos to help authorities respond faster.</p>
+            
+            <div class="features">
+                <div class="feature">
+                    <div class="feature-icon">
+                        <i class="fas fa-camera"></i>
+                    </div>
+                    <h3>Visual Reporting</h3>
+                    <p>Send photos or videos with simple taps - no writing required</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">
+                        <i class="fas fa-map-marked-alt"></i>
+                    </div>
+                    <h3>Location Alerts</h3>
+                    <p>Get real-time warnings about hazards in your area</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">
+                        <i class="fas fa-life-ring"></i>
+                    </div>
+                    <h3>Save Lives</h3>
+                    <p>Your reports help emergency services respond faster</p>
+                </div>
+            </div>
+            
+            <div class="about-actions">
+                <button class="btn btn-secondary" id="learn-more">Learn More</button>
+                <a href="{{ url_for('main.signup') }}" class="btn btn-primary">Join Now</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="how-it-works" id="how-it-works">
+        <div class="container">
+            <h2>How OceanGuard Works</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-icon">
+                        <i class="fas fa-eye"></i>
+                    </div>
+                    <h3>See Hazard</h3>
+                    <p>Notice unusual ocean activity</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-icon">
+                        <i class="fas fa-camera"></i>
+                    </div>
+                    <h3>Capture Evidence</h3>
+                    <p>Take a photo or video</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-icon">
+                        <i class="fas fa-share-alt"></i>
+                    </div>
+                    <h3>Share Report</h3>
+                    <p>Submit with one tap</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div class="step-icon">
+                        <i class="fas fa-truck"></i>
+                    </div>
+                    <h3>Get Help</h3>
+                    <p>Authorities respond quickly</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="testimonials">
+        <div class="container">
+            <h2>Community Stories</h2>
+            <div class="testimonial-cards">
+                <div class="testimonial-card">
+                    <div class="testimonial-content">
+                        <p>"OceanGuard helped our village evacuate before the big waves hit. We're forever grateful."</p>
+                    </div>
+                    <div class="testimonial-author">
+                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80" alt="Rahul from Kerala">
+                        <div>
+                            <h4>Rahul</h4>
+                            <p>Fisherman, Kerala</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-content">
+                        <p>"I can't read well, but with OceanGuard I could still report the dangerous currents."</p>
+                    </div>
+                    <div class="testimonial-author">
+                        <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80" alt="Lakshmi from Tamil Nadu">
+                        <div>
+                            <h4>Lakshmi</h4>
+                            <p>Village Elder, Tamil Nadu</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-content">
+                        <p>"As a local official, OceanGuard helps us respond faster to real threats."</p>
+                    </div>
+                    <div class="testimonial-author">
+                        <img src="https://images.unsplash.com/photo-1552058544-f2b08422138a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80" alt="Officer Singh">
+                        <div>
+                            <h4>Officer Singh</h4>
+                            <p>Coastal Security, Odisha</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call-to-Action Section -->
+    <section class="cta" id="report">
+        <div class="container">
+            <h2>Take Action Now</h2>
+            <p>Your report could save lives in your community</p>
+            <div class="cta-buttons">
+                <div class="cta-item">
+                    <a href="report.html" class="btn btn-large btn-alert">
+                        <i class="fas fa-exclamation-circle"></i>
+                        Report Now
+                    </a>
+                    <p>See something dangerous? Report it immediately</p>
+                </div>
+                <div class="cta-item">
+                    <a href="alerts.html" class="btn btn-large btn-info">
+                        <i class="fas fa-bell"></i>
+                        View Alerts
+                    </a>
+                    <p>Check for warnings in your area</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer" id="contact">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>OceanGuard</h3>
+                    <p>Helping coastal communities stay safe from ocean dangers through technology and community reporting.</p>
+                    <div class="footer-social">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="#home">Home</a></li>
+                        <li><a href="#about">About</a></li>
+                        <li><a href="#how-it-works">How It Works</a></li>
+                        <li><a href="#alerts">Alerts</a></li>
+                        <li><a href="#contact">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Resources</h4>
+                    <ul>
+                        <li><a href="#">Safety Guidelines</a></li>
+                        <li><a href="#">Emergency Numbers</a></li>
+                        <li><a href="#">Evacuation Routes</a></li>
+                        <li><a href="#">Weather Updates</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Contact Us</h4>
+                    <div class="contact-info">
+                        <p><i class="fas fa-phone"></i> Emergency: 1090</p>
+                        <p><i class="fas fa-envelope"></i> help@oceanguard.gov.in</p>
+                        <p><i class="fas fa-map-marker-alt"></i> Ministry of Earth Sciences, New Delhi</p>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2023 Ministry of Earth Sciences and INCOIS. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+  
+</body>
+</html>

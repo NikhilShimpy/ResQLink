@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emergency Reports Nearby</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/citizen_nearestReports.css') }}">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+</head>
+<body>
+    <header>
+        <h1>Emergency Reports Nearby</h1>
+        <div class="controls">
+            <button id="refreshBtn">Refresh Reports</button>
+            <button id="locationBtn">Detect My Location</button>
+            <select id="radiusSelect">
+                <option value="10">10 km</option>
+                <option value="20">20 km</option>
+                <option value="50" selected>50 km</option>
+                <option value="100">100 km</option>\
+                <option value="200">200 km</option>
+                <option value="300">300 km</option>
+                <option value="400">400 km</option>
+                <option value="500">500 km</option>
+                 <option value="1000">1000 km</option>
+            </select>
+        </div>
+    </header>
+
+    <main>
+        <div id="loading">Loading reports...</div>
+        <div id="locationPrompt" class="hidden">
+            <p>Please allow location access to see reports near you.</p>
+            <button id="requestLocation">Allow Location Access</button>
+        </div>
+        <div id="errorMessage" class="hidden">
+            <p>Failed to load reports. Please check your internet connection and try again.</p>
+        </div>
+        <div id="reportsList" class="hidden"></div>
+    </main>
+
+    <div id="reportModal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+     
+    <script src="{{ url_for('static', filename='js/citizen_nearestReports.js') }}"></script>
+</body>
+</html>

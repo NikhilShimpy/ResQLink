@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Dashboard — Samudra Suraksha</title>
+  <!-- CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/citizen_profile.css') }}">
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Firebase v9 Modular SDK -->
+  <script type="module" src="{{ url_for('static', filename='js/citizen_profile.js') }}"></script>
+</head>
+<body>
+  <div class="dashboard-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h2><i class="fas fa-water"></i> Samudra Suraksha</h2>
+      </div>
+      <nav class="sidebar-nav">
+        <ul>
+          <li class="nav-item active">
+            <a href="#"><i class="fas fa-user"></i> Profile</a>
+          </li>
+          <li class="nav-item">
+            <a href="#"><i class="fas fa-flag"></i> My Reports</a>
+          </li>
+          <li class="nav-item">
+            <a href="#"><i class="fas fa-chart-bar"></i> Statistics</a>
+          </li>
+          <li class="nav-item">
+            <a href="#"><i class="fas fa-cog"></i> Settings</a>
+          </li>
+          <li class="nav-item">
+            <a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+          </li>
+        </ul>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <header class="content-header">
+        <h1>User Dashboard</h1>
+        <div class="header-actions">
+          <button class="btn-notification">
+            <i class="fas fa-bell"></i>
+            <span class="notification-badge">3</span>
+          </button>
+          <div class="user-menu">
+            <img id="headerProfileImg" src="https://via.placeholder.com/40" alt="Profile">
+            <span id="headerUserName">User</span>
+          </div>
+        </div>
+      </header>
+
+      <div class="content-body">
+        <!-- Profile Card -->
+        <section class="profile-section card">
+          <div class="card-header">
+            <h2>Profile Information</h2>
+            <button class="btn-icon" id="editBtn">
+              <i class="fas fa-edit"></i> Edit
+            </button>
+          </div>
+          <div class="card-body">
+            <div class="profile-content">
+              <div class="profile-image-large">
+                <img id="profileImg" src="https://via.placeholder.com/150" alt="Profile Image">
+              </div>
+              <div class="profile-details">
+                <h2 id="userName">Loading...</h2>
+                <div class="detail-grid">
+                  <div class="detail-item">
+                    <i class="fas fa-envelope"></i>
+                    <div>
+                      <label>Email</label>
+                      <span id="userEmail">N/A</span>
+                    </div>
+                  </div>
+                  <div class="detail-item">
+                    <i class="fas fa-phone"></i>
+                    <div>
+                      <label>Mobile</label>
+                      <span id="userMobile">N/A</span>
+                    </div>
+                  </div>
+                  <div class="detail-item">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <div>
+                      <label>Address</label>
+                      <span id="userAddress">N/A</span>
+                    </div>
+                  </div>
+                  <div class="detail-item">
+                    <i class="fas fa-user-tag"></i>
+                    <div>
+                      <label>Role</label>
+                      <span id="userrole">Citizen</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- My Reports Section -->
+        <section class="reports-section card">
+          <div class="card-header">
+            <h2>My Reports</h2>
+            <button class="btn-icon" id="refreshReportsBtn">
+              <i class="fas fa-sync-alt"></i> Refresh
+            </button>
+          </div>
+          <div class="card-body">
+            <div class="reports-filters">
+              <div class="filter-group">
+                <label>Filter by:</label>
+                <select id="reportFilter">
+                  <option value="all">All Reports</option>
+                  <option value="tsunami">Tsunami</option>
+                  <option value="flood">Flood</option>
+                  <option value="earthquake">Earthquake</option>
+                  <option value="cyclone">Cyclone</option>
+                </select>
+              </div>
+              <div class="search-group">
+                <input type="text" id="reportSearch" placeholder="Search reports...">
+                <i class="fas fa-search"></i>
+              </div>
+            </div>
+            <div class="reports-list" id="reportsList">
+              <div class="loading-state">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Loading your reports...</p>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- Edit Profile Modal -->
+  <div id="editModal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Edit Profile</h2>
+        <button class="modal-close" id="closeBtn">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <form id="editForm">
+        <div class="form-group">
+          <label for="editName">Full Name</label>
+          <input type="text" id="editName" placeholder="Full Name">
+        </div>
+
+        <div class="form-group">
+          <label for="editMobile">Mobile Number</label>
+          <input type="text" id="editMobile" placeholder="Mobile Number">
+        </div>
+
+        <div class="form-group">
+          <label for="editAddress">Address</label>
+          <input type="text" id="editAddress" placeholder="Address">
+        </div>
+
+        <div class="form-group">
+          <label for="editProfileUrl">Profile Image URL</label>
+          <input type="text" id="editProfileUrl" placeholder="Profile Image URL">
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-primary" id="saveBtn">Save Changes</button>
+          <button type="button" class="btn-secondary" id="cancelBtn">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Report Detail Modal -->
+  <div id="reportModal" class="modal hidden">
+    <div class="modal-content large">
+      <div class="modal-header">
+        <h2>Report Details</h2>
+        <button class="modal-close" id="closeReportBtn">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body" id="reportDetails">
+        <!-- Report details will be inserted here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Initialize tooltips and other UI enhancements
+    document.addEventListener('DOMContentLoaded', function() {
+      // Add tooltips to buttons
+      const tooltipElems = document.querySelectorAll('[data-tooltip]');
+      tooltipElems.forEach(elem => {
+        elem.addEventListener('mouseenter', showTooltip);
+        elem.addEventListener('mouseleave', hideTooltip);
+      });
+      
+      // Close modals when clicking outside
+      const modals = document.querySelectorAll('.modal');
+      modals.forEach(modal => {
+        modal.addEventListener('click', function(e) {
+          if (e.target === modal) {
+            modal.classList.add('hidden');
+          }
+        });
+      });
+    });
+
+    function showTooltip(e) {
+      const tooltip = e.target.getAttribute('data-tooltip');
+      const tooltipElem = document.createElement('div');
+      tooltipElem.className = 'tooltip';
+      tooltipElem.textContent = tooltip;
+      document.body.appendChild(tooltipElem);
+      
+      const rect = e.target.getBoundingClientRect();
+      tooltipElem.style.top = (rect.top - tooltipElem.offsetHeight - 10) + 'px';
+      tooltipElem.style.left = (rect.left + rect.width/2 - tooltipElem.offsetWidth/2) + 'px';
+    }
+
+    function hideTooltip() {
+      const tooltip = document.querySelector('.tooltip');
+      if (tooltip) {
+        tooltip.remove();
+      }
+    }
+  </script>
+</body>
+</html>

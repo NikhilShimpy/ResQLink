@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Disaster Reporting - Analyst Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/analyst_dashboard.css') }}">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <h1>Disaster Reporting Analytics</h1>
+            <div class="user-info">
+                <span>Analyst</span>
+                <div class="user-avatar"></div>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="dashboard-nav">
+            <ul>
+                <li class="active"><a href="#">Dashboard</a></li>
+                <li><a href="#">Population</a></li>
+                <li><a href="#">Demography</a></li>
+                <li><a href="#">Profile</a></li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="dashboard-content">
+            <!-- Filters Section -->
+            <section class="filters-section">
+                <div class="filter-group">
+                    <label for="state-filter">State:</label>
+                    <select id="state-filter">
+                        <option value="">All States</option>
+                        <!-- States will be populated dynamically -->
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="district-filter">District:</label>
+                    <select id="district-filter">
+                        <option value="">All Districts</option>
+                        <option value="Mumbai">Mumbai</option>
+                        <option value="Indore">Indore</option>
+                        <option value="Bhopal">Bhopal</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="search-input">Search:</label>
+                    <input type="text" id="search-input" placeholder="Search by location...">
+                </div>
+                <button id="apply-filters" class="btn-primary">Apply Filters</button>
+                <button id="reset-filters" class="btn-secondary">Reset</button>
+            </section>
+
+            <!-- Statistics Cards -->
+            <section class="stats-section">
+                <div class="stat-card">
+                    <h3>Total Reports</h3>
+                    <p id="total-reports">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Valid Reports</h3>
+                    <p id="valid-reports">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Avg. Severity</h3>
+                    <p id="avg-severity">0.0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Latest Report</h3>
+                    <p id="latest-report">-</p>
+                </div>
+            </section>
+
+            <!-- Charts and Map Section -->
+            <section class="visualization-section">
+                <div class="chart-container">
+                    <canvas id="reports-chart"></canvas>
+                </div>
+                <div class="map-container">
+                    <div id="map"></div>
+                </div>
+            </section>
+
+            <!-- Reports Table -->
+            <section class="reports-section">
+                <h2>Disaster Reports</h2>
+                <div class="table-container">
+                    <table id="reports-table">
+                        <thead>
+                            <tr>
+                                <th>Location</th>
+                                <th>Severity</th>
+                                <th>Report Count</th>
+                                <th>Timestamp</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Table rows will be populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="pagination">
+                    <button id="prev-page" class="btn-secondary">Previous</button>
+                    <span id="page-info">Page 1 of 1</span>
+                    <button id="next-page" class="btn-secondary">Next</button>
+                </div>
+            </section>
+        </main>
+
+        <!-- Loading Overlay -->
+        <div id="loading-overlay" class="loading-overlay">
+            <div class="spinner"></div>
+            <p>Loading data...</p>
+        </div>
+    </div>
+
+    <!-- Firebase and Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Firebase App (the core Firebase SDK) is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <!-- Add Firebase products that you want to use -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    
+    
+    <script src="{{ url_for('static', filename='js/analyst_dashboard.js') }}"></script>
+</body>
+</html>

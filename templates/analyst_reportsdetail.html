@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report Details - Disaster Reporting System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/analyst_reportsdetail.css') }}">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</head>
+<body>
+    <div class="report-detail-container">
+        <!-- Header -->
+        <header class="detail-header">
+            <div class="header-content">
+                <h1>Disaster Report Details</h1>
+                <button id="back-button" class="btn-secondary">Back to Dashboard</button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="detail-content">
+            <!-- Loading Overlay -->
+            <div id="loading-overlay" class="loading-overlay">
+                <div class="spinner"></div>
+                <p>Loading report details...</p>
+            </div>
+
+            <!-- Error Message -->
+            <div id="error-message" class="error-message" style="display: none;">
+                <h3>Error Loading Report</h3>
+                <p id="error-text"></p>
+            </div>
+
+            <!-- Report Content -->
+            <div id="report-content" style="display: none;">
+                <!-- Report Overview Section -->
+                <section class="overview-section">
+                    <div class="section-header">
+                        <h2>Report Overview</h2>
+                    </div>
+                    <div class="overview-grid">
+                        <div class="overview-card">
+                            <h3>Location Details</h3>
+                            <div class="info-row">
+                                <span class="label">State:</span>
+                                <span id="state" class="value"></span>
+                            </div>
+                            <div class="info-row">
+                                <span class="label">District:</span>
+                                <span id="district" class="value"></span>
+                            </div>
+                            <div class="info-row">
+                                <span class="label">Town:</span>
+                                <span id="town" class="value"></span>
+                            </div>
+                            <div class="info-row">
+                                <span class="label">Village:</span>
+                                <span id="village" class="value"></span>
+                            </div>
+                            <div class="info-row">
+                                <span class="label">Coordinates:</span>
+                                <span id="coordinates" class="value"></span>
+                            </div>
+                        </div>
+
+                        <div class="overview-card">
+                            <h3>Incident Details</h3>
+                            <div class="info-row">
+                                <span class="label">Disaster Type:</span>
+                                <span id="disaster-type" class="value"></span>
+                            </div>
+                            <div class="info-row">
+                                <span class="label">Severity Score:</span>
+                                <span id="severity" class="value"></span>
+                            </div>
+                            <div class="info-row">
+                                <span class="label">Report Count:</span>
+                                <span id="report-count" class="value"></span>
+                            </div>
+                            <div class="info-row">
+                                <span class="label">Timestamp:</span>
+                                <span id="timestamp" class="value"></span>
+                            </div>
+                            <div class="info-row">
+                                <span class="label">Location ID:</span>
+                                <span id="location-id" class="value"></span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Description Section -->
+                <section class="description-section">
+                    <div class="section-header">
+                        <h2>Incident Description</h2>
+                    </div>
+                    <div class="description-card">
+                        <p id="description"></p>
+                    </div>
+                </section>
+
+                <!-- Media Section -->
+                <section class="media-section">
+                    <div class="section-header">
+                        <h2>Media Evidence</h2>
+                    </div>
+                    <div id="media-container" class="media-grid">
+                        <!-- Media items will be populated here -->
+                    </div>
+                </section>
+
+                <!-- Map Section -->
+                <section class="map-section">
+                    <div class="section-header">
+                        <h2>Location Map</h2>
+                    </div>
+                    <div id="map" class="map-container"></div>
+                </section>
+            </div>
+        </main>
+
+        <!-- Media Modal -->
+        <div id="media-modal" class="modal">
+            <span class="close">&times;</span>
+            <img class="modal-content" id="modal-image">
+            <video class="modal-content" id="modal-video" controls style="display: none;"></video>
+            <div id="caption"></div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Application JS -->
+    <script src="{{ url_for('static', filename='js/analyst_reportsdetail.js') }}"></script>
+</body>
+</html>

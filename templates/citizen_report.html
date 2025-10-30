@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Disaster Report Submission</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/citizen_report.css') }}" />
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Disaster Report Submission</h1>
+            <p>Report emergencies and disasters in your area to help authorities respond faster</p>
+        </header>
+
+        <div class="form-container">
+            <form id="disasterReportForm">
+                <div class="form-section">
+                    <h2>Disaster Information</h2>
+                    
+                    <div class="form-group">
+                        <label for="disasterType">Disaster Type *</label>
+                        <select id="disasterType" required>
+                            <option value="">Select disaster type</option>
+                            <option value="flood">Flood</option>
+                            <option value="earthquake">Earthquake</option>
+                            <option value="fire">Fire</option>
+                            <option value="landslide">Landslide</option>
+                            <option value="storm">Storm</option>
+                            <option value="tsunami">Tsunami</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="severityScore">Severity Score (1-10) *</label>
+                        <input type="number" id="severityScore" min="1" max="10" value="3" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description">Description *</label>
+                        <textarea id="description" rows="4" placeholder="Please describe the disaster in detail..." required></textarea>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h2>Location Details</h2>
+
+                    <div class="location-header">
+                        <span>Enter your location details</span>
+                        <button type="button" id="autoLocateBtn" class="btn-secondary">
+                            <span class="icon">📍</span> Auto Detect My Location
+                        </button>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="state">State *</label>
+                       <select id="state" required>
+                            <option value="">Select state</option>
+                            <option value="Andhra Pradesh">Andhra Pradesh</option>
+                            <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+                            <option value="Assam">Assam</option>
+                            <option value="Bihar">Bihar</option>
+                            <option value="Chhattisgarh">Chhattisgarh</option>
+                            <option value="Goa">Goa</option>
+                            <option value="Gujarat">Gujarat</option>
+                            <option value="Haryana">Haryana</option>
+                            <option value="Himachal Pradesh">Himachal Pradesh</option>
+                            <option value="Jharkhand">Jharkhand</option>
+                            <option value="Karnataka">Karnataka</option>
+                            <option value="Kerala">Kerala</option>
+                            <option value="Madhya Pradesh">Madhya Pradesh</option>
+                            <option value="Maharashtra">Maharashtra</option>
+                            <option value="Manipur">Manipur</option>
+                            <option value="Meghalaya">Meghalaya</option>
+                            <option value="Mizoram">Mizoram</option>
+                            <option value="Nagaland">Nagaland</option>
+                            <option value="Odisha">Odisha</option>
+                            <option value="Punjab">Punjab</option>
+                            <option value="Rajasthan">Rajasthan</option>
+                            <option value="Sikkim">Sikkim</option>
+                            <option value="Tamil Nadu">Tamil Nadu</option>
+                            <option value="Telangana">Telangana</option>
+                            <option value="Tripura">Tripura</option>
+                            <option value="Uttar Pradesh">Uttar Pradesh</option>
+                            <option value="Uttarakhand">Uttarakhand</option>
+                            <option value="West Bengal">West Bengal</option>
+                            <option value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option>
+                            <option value="Chandigarh">Chandigarh</option>
+                            <option value="Dadra and Nagar Haveli and Daman & Diu">Dadra and Nagar Haveli and Daman & Diu</option>
+                            <option value="Delhi">Delhi</option>
+                            <option value="Jammu and Kashmir">Jammu and Kashmir</option>
+                            <option value="Ladakh">Ladakh</option>
+                            <option value="Lakshadweep">Lakshadweep</option>
+                            <option value="Puducherry">Puducherry</option>
+            </select>
+
+                    </div>
+
+                    <div class="form-group">
+                        <label for="district">District *</label>
+                        <input type="text" id="district" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="city">City *</label>
+                        <input type="text" id="city" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="town">Town</label>
+                        <input type="text" id="town">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="village">Village / Area / Street *</label>
+                        <input type="text" id="village" required>
+                    </div>
+
+                    <div class="form-group dual-input">
+                        <div>
+                            <label for="latitude">Latitude</label>
+                            <input type="text" id="latitude" readonly>
+                        </div>
+                        <div>
+                            <label for="longitude">Longitude</label>
+                            <input type="text" id="longitude" readonly>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h2>Location Selection</h2>
+                    <div class="map-container">
+                        <div id="map"></div>
+                        <button type="button" id="autoLocateBtn" class="btn-secondary">
+                            <span class="icon">📍</span> Auto Detect My Location
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h2>Media Upload</h2>
+                    <div class="form-group">
+                        <label for="mediaUpload">Upload Images/Videos</label>
+                        <input type="file" id="mediaUpload" multiple accept="image/*,video/*">
+                    </div>
+                    
+                    <div id="mediaPreview" class="media-preview">
+                        <p>No media selected</p>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" id="submitBtn" class="btn-primary">Submit Report</button>
+                </div>
+            </form>
+        </div>
+
+        <div id="message" class="message hidden"></div>
+        
+        <div id="reportDetails" class="report-details hidden">
+            <h2>Report Submitted Successfully</h2>
+            <div class="details-content"></div>
+        </div>
+    </div>
+
+    <!-- Firebase and Cloudinary SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://upload-widget.cloudinary.com/global/all.js"></script>
+    
+    <!-- Our JavaScript -->
+    <script src="{{ url_for('static', filename='js/citizen_report.js') }}"></script>
+</body>
+</html>

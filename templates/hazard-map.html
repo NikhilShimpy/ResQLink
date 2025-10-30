@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ocean Hazard Map - India</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* CSS styles from previous implementation */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8fafc;
+        }
+
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background-color: #0865d3;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            color: white;
+            font-weight: 600;
+            font-size: 1.2rem;
+        }
+
+        .logo {
+            width: 40px;
+            height: 40px;
+        }
+
+        .back-button {
+            background-color: white;
+            color: #0865d3;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: background-color 0.3s;
+        }
+
+        .back-button:hover {
+            background-color: #f1f5f9;
+        }
+
+        .map-container {
+            display: flex;
+            height: calc(100vh - 70px);
+        }
+
+        #map {
+            flex: 1;
+            height: 100%;
+        }
+
+        .sidebar {
+            width: 350px;
+            background-color: white;
+            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .sidebar h2 {
+            color: #0f172a;
+            margin-bottom: 1rem;
+        }
+
+        .filters-container {
+            background-color: #f8fafc;
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        .filter-group {
+            margin-bottom: 1rem;
+        }
+
+        .filter-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #374151;
+        }
+
+        .filter-group select, .filter-group input {
+            width: 100%;
+            padding: 0.6rem 0.8rem;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+        }
+
+        .checkbox-group label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: normal;
+            cursor: pointer;
+        }
+
+        .checkbox-group input {
+            width: auto;
+        }
+
+        .apply-filters {
+            background-color: #0865d3;
+            color: white;
+            border: none;
+            padding: 0.7rem;
+            border-radius: 6px;
+            width: 100%;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .apply-filters:hover {
+            background-color: #0a57c9;
+        }
+
+        .search-container {
+            position: relative;
+        }
+
+        .search-container input {
+            padding-left: 2.5rem;
+        }
+
+        .search-container i {
+            position: absolute;
+            left: 0.8rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6b7280;
+        }
+
+        .legend {
+            background-color: white;
+            border-radius: 8px;
+            padding: 1rem;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .legend h3 {
+            margin-bottom: 0.8rem;
+            color: #0f172a;
+            font-size: 1rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+        }
+
+        .reports-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .reports-list h3 {
+            margin-bottom: 1rem;
+            color: #0f172a;
+        }
+
+        .report-item {
+            background-color: #f8fafc;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 0.8rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .report-item:hover {
+            background-color: #e2e8f0;
+        }
+
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .report-location {
+            font-weight: 500;
+            color: #0f172a;
+        }
+
+        .report-type {
+            padding: 0.2rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .report-details {
+            font-size: 0.9rem;
+            color: #6b7280;
+        }
+
+        .report-severity {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
+        }
+
+        .severity-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .map-container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: 40%;
+            }
+            
+            #map {
+                height: 60%;
+            }
+            
+            .navbar {
+                padding: 0.8rem 1rem;
+            }
+        }
+
+        /* Popup styling */
+        .leaflet-popup-content {
+            margin: 0.8rem;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .popup-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #0f172a;
+        }
+
+        .popup-detail {
+            margin-bottom: 0.3rem;
+            font-size: 0.9rem;
+        }
+
+        .popup-description {
+            margin-top: 0.5rem;
+            padding-top: 0.5rem;
+            border-top: 1px solid #e5e7eb;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Section -->
+    <header class="header">
+        <nav class="navbar">
+            <div class="nav-brand">
+                <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiMwODY1ZDMiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMiAxMmM4LjI0IDAgNy44Mi0yLjU1IDkuNDEtNi4yMkMyMC4xOSAxMiA5LjIyIDEyIDIuMTIgMTJjMCAwIDQuMjQgMCA5LjQxIDYuMjJDMTAuOTIgMjIuNTUgNC4yNCAyNCAyIDEyeiI+PC9wYXRoPjwvc3ZnPg==" alt="Ocean Hazard Logo" class="logo">
+                <span>Ocean Hazard Map</span>
+            </div>
+            <button class="back-button" onclick="window.location.href='{{ url_for('main.citizen_dashboard') }}'">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </button>
+
+        </nav>
+    </header>
+
+    <div class="map-container">
+        <div id="map"></div>
+        <div class="sidebar">
+            <div class="filters-container">
+                <h2>Filters</h2>
+                <div class="filter-group">
+                    <label for="disaster-type">Disaster Type</label>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" name="disaster-type" value="flood" checked> Flood</label>
+                        <label><input type="checkbox" name="disaster-type" value="tsunami" checked> Tsunami</label>
+                        <label><input type="checkbox" name="disaster-type" value="cyclone" checked> Cyclone</label>
+                        <label><input type="checkbox" name="disaster-type" value="storm surge" checked> Storm Surge</label>
+                        <label><input type="checkbox" name="disaster-type" value="high waves" checked> High Waves</label>
+                        <label><input type="checkbox" name="disaster-type" value="rip currents" checked> Rip Currents</label>
+                    </div>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="severity">Severity Level</label>
+                    <select id="severity">
+                        <option value="all">All Levels</option>
+                        <option value="7-10">High (7-10)</option>
+                        <option value="4-6">Medium (4-6)</option>
+                        <option value="1-3">Low (1-3)</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="region-search">Search Region</label>
+                    <div class="search-container">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="region-search" placeholder="State, district, city...">
+                    </div>
+                </div>
+                
+                <button class="apply-filters" id="apply-filters">Apply Filters</button>
+            </div>
+            
+            <div class="legend">
+                <h3>Severity Legend</h3>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #dc2626;"></div>
+                    <span>High (7-10)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #f59e0b;"></div>
+                    <span>Medium (4-6)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #10b981;"></div>
+                    <span>Low (1-3)</span>
+                </div>
+            </div>
+            
+            <div class="reports-list">
+                <h3>Recent Reports</h3>
+                <div id="reports-container">
+                    <!-- Reports will be populated here by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+    <script>
+        // Initialize map
+       // Initialize map
+const map = L.map('map').setView([20.5937, 78.9629], 5);
+
+// Add base layer
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+}).addTo(map);
+
+// Create layer groups for different disaster types
+const layerGroups = {
+    flood: L.layerGroup(),
+    tsunami: L.layerGroup(),
+    cyclone: L.layerGroup(),
+    'storm surge': L.layerGroup(),
+    'high waves': L.layerGroup(),
+    'rip currents': L.layerGroup()
+};
+
+// Add layer groups to map
+Object.values(layerGroups).forEach(group => group.addTo(map));
+
+// Create marker cluster group for individual markers
+const markers = L.markerClusterGroup({
+    maxClusterRadius: 40,
+    spiderfyOnMaxZoom: true,
+    showCoverageOnHover: false,
+    zoomToBoundsOnClick: true
+});
+
+// Variables for zoom-based clustering
+let currentZoomLevel = map.getZoom();
+let isShowingAggregatedView = false;
+let cityMarkers = L.layerGroup();
+
+// Function to determine marker color based on severity
+function getSeverityColor(severity) {
+    if (severity >= 7) return '#dc2626'; // High - red
+    if (severity >= 4) return '#f59e0b'; // Medium - orange
+    return '#10b981'; // Low - green
+}
+
+// Function to create custom icon
+function createCustomIcon(disasterType, severity) {
+    const color = getSeverityColor(severity);
+    
+    return L.divIcon({
+        className: 'custom-marker',
+        html: `<div style="background-color: ${color}; width: 20px; height: 20px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 5px rgba(0,0,0,0.5);"></div>`,
+        iconSize: [24, 24],
+        iconAnchor: [12, 12]
+    });
+}
+
+// Function to get location name for display
+function getLocationName(report) {
+    if (report.village) return report.village;
+    if (report.town) return report.town;
+    if (report.city) return report.city;
+    if (report.district) return report.district;
+    return report.state;
+}
+
+// Function to group reports by city and calculate counts
+function groupReportsByCity(reports) {
+    const cityGroups = {};
+    
+    reports.forEach(report => {
+        // Use city as the key, fall back to district if city is not available
+        const locationKey = report.city || report.district || 'Unknown';
+        
+        if (!cityGroups[locationKey]) {
+            cityGroups[locationKey] = {
+                count: 0,
+                reports: [],
+                lat: report.latitude,
+                lng: report.longitude,
+                city: report.city,
+                district: report.district,
+                state: report.state
+            };
+        }
+        
+        cityGroups[locationKey].count++;
+        cityGroups[locationKey].reports.push(report);
+        
+        // Average the coordinates for the city marker
+        cityGroups[locationKey].lat = (cityGroups[locationKey].lat + report.latitude) / 2;
+        cityGroups[locationKey].lng = (cityGroups[locationKey].lng + report.longitude) / 2;
+    });
+    
+    return Object.values(cityGroups);
+}
+
+// Function to create aggregated city markers
+function createCityMarkers(cityData) {
+    cityMarkers.clearLayers();
+    
+    cityData.forEach(city => {
+        const marker = L.marker([city.lat, city.lng])
+            .bindPopup(`
+                <div class="popup-title">${city.city || city.district}</div>
+                <div class="popup-detail"><strong>Total Reports:</strong> ${city.count}</div>
+                <div class="popup-detail"><strong>State:</strong> ${city.state}</div>
+                <div class="popup-detail"><strong>District:</strong> ${city.district}</div>
+            `);
+        
+        // Add a circle with count text
+        const circle = L.circleMarker([city.lat, city.lng], {
+            radius: 15 + Math.log(city.count) * 3, // Scale based on count
+            color: '#0865d3',
+            weight: 2,
+            fillColor: '#0865d3',
+            fillOpacity: 0.7
+        }).bindTooltip(`${city.count}`, { permanent: false, direction: 'center', className: 'city-count-tooltip' });
+        
+        cityMarkers.addLayer(marker);
+        cityMarkers.addLayer(circle);
+    });
+    
+    return cityMarkers;
+}
+
+// Function to update map view based on zoom level
+function updateMapViewBasedOnZoom() {
+    const newZoomLevel = map.getZoom();
+    
+    // Determine if we should show aggregated or individual view
+    const shouldShowAggregated = newZoomLevel <= 7; // Adjust this threshold as needed
+    
+    if (shouldShowAggregated !== isShowingAggregatedView) {
+        isShowingAggregatedView = shouldShowAggregated;
+        
+        if (shouldShowAggregated) {
+            // Switch to aggregated city view
+            markers.remove();
+            const cityData = groupReportsByCity(window.hazardData);
+            createCityMarkers(cityData).addTo(map);
+        } else {
+            // Switch to individual report view
+            cityMarkers.remove();
+            addIndividualMarkers(window.hazardData);
+        }
+    }
+    
+    currentZoomLevel = newZoomLevel;
+}
+
+// Function to add individual markers
+function addIndividualMarkers(reports) {
+    markers.clearLayers();
+    Object.values(layerGroups).forEach(group => group.clearLayers());
+    
+    reports.forEach(report => {
+        const { latitude, longitude, disaster_type, severity_score } = report;
+        
+        const customIcon = createCustomIcon(disaster_type, severity_score);
+        
+        const marker = L.marker([latitude, longitude], { icon: customIcon })
+            .bindPopup(`
+                <div class="popup-title">${getLocationName(report)}</div>
+                <div class="popup-detail"><strong>Type:</strong> ${disaster_type}</div>
+                <div class="popup-detail"><strong>Reports:</strong> ${report.report_count}</div>
+                <div class="popup-detail"><strong>Severity:</strong> ${severity_score}/10</div>
+                <div class="popup-description">${report.description}</div>
+            `);
+        
+        // Add to appropriate layer group
+        layerGroups[disaster_type].addLayer(marker);
+        
+        // Add to cluster group
+        markers.addLayer(marker);
+    });
+    
+    // Add cluster group to map
+    map.addLayer(markers);
+}
+
+// Function to add markers to map (handles both aggregated and individual views)
+function addMarkers(reports) {
+    // Clear existing markers
+    markers.clearLayers();
+    cityMarkers.clearLayers();
+    Object.values(layerGroups).forEach(group => group.clearLayers());
+    
+    // Determine which view to show based on current zoom level
+    const zoomLevel = map.getZoom();
+    isShowingAggregatedView = zoomLevel <= 7; // Adjust this threshold as needed
+    
+    if (isShowingAggregatedView) {
+        // Show aggregated city markers
+        const cityData = groupReportsByCity(reports);
+        createCityMarkers(cityData).addTo(map);
+    } else {
+        // Show individual markers
+        addIndividualMarkers(reports);
+    }
+}
+
+// Function to filter reports based on selected filters
+function filterReports() {
+    const selectedTypes = Array.from(document.querySelectorAll('input[name="disaster-type"]:checked'))
+        .map(input => input.value);
+        
+    const severityFilter = document.getElementById('severity').value;
+    const searchTerm = document.getElementById('region-search').value.toLowerCase();
+    
+    const filteredReports = window.hazardData.filter(report => {
+        // Filter by disaster type
+        if (!selectedTypes.includes(report.disaster_type)) return false;
+        
+        // Filter by severity
+        if (severityFilter !== 'all') {
+            const [min, max] = severityFilter.split('-').map(Number);
+            if (report.severity_score < min || report.severity_score > max) return false;
+        }
+        
+        // Filter by search term
+        if (searchTerm) {
+            const searchableText = [
+                report.state, 
+                report.district, 
+                report.city, 
+                report.town, 
+                report.village
+            ].join(' ').toLowerCase();
+            
+            if (!searchableText.includes(searchTerm)) return false;
+        }
+        
+        return true;
+    });
+    
+    // Update markers
+    addMarkers(filteredReports);
+    
+    // Update reports list
+    updateReportsList(filteredReports);
+}
+
+// Function to update reports list in sidebar
+function updateReportsList(reports) {
+    const container = document.getElementById('reports-container');
+    container.innerHTML = '';
+    
+    if (reports.length === 0) {
+        container.innerHTML = '<p>No reports match your filters.</p>';
+        return;
+    }
+    
+    // Sort by severity (descending) and then by report count (descending)
+    const sortedReports = [...reports].sort((a, b) => {
+        if (b.severity_score !== a.severity_score) {
+            return b.severity_score - a.severity_score;
+        }
+        return b.report_count - a.report_count;
+    });
+    
+    // Show top 10 reports
+    sortedReports.slice(0, 10).forEach(report => {
+        const color = getSeverityColor(report.severity_score);
+        
+        const reportElement = document.createElement('div');
+        reportElement.className = 'report-item';
+        reportElement.innerHTML = `
+            <div class="report-header">
+                <div class="report-location">${getLocationName(report)}</div>
+                <span class="report-type" style="background-color: ${color}; color: white;">${report.disaster_type}</span>
+            </div>
+            <div class="report-details">
+                ${report.district}, ${report.state}
+            </div>
+            <div class="report-severity">
+                <div class="severity-dot" style="background-color: ${color};"></div>
+                Severity: ${report.severity_score}/10 - ${report.report_count} reports
+            </div>
+        `;
+        
+        // Add click event to focus on the marker
+        reportElement.addEventListener('click', () => {
+            map.setView([report.latitude, report.longitude], 10);
+            
+            // Open popup (we need to find the marker)
+            markers.getLayers().forEach(layer => {
+                const latlng = layer.getLatLng();
+                if (latlng.lat === report.latitude && latlng.lng === report.longitude) {
+                    layer.openPopup();
+                }
+            });
+        });
+        
+        container.appendChild(reportElement);
+    });
+    
+    if (sortedReports.length > 10) {
+        const moreElement = document.createElement('p');
+        moreElement.style.textAlign = 'center';
+        moreElement.style.marginTop = '1rem';
+        moreElement.textContent = `...and ${sortedReports.length - 10} more reports`;
+        container.appendChild(moreElement);
+    }
+}
+
+// Function to go back to dashboard
+function goBack() {
+    window.location.href = 'citizen_dashboard.html';
+}
+
+// Load data from JSON file
+async function loadData() {
+    try {
+        const response = await fetch('static/data/reports.json');
+        const data = await response.json();
+        window.hazardData = data.hazardData;
+        
+        // Initialize the map with data
+        addMarkers(window.hazardData);
+        updateReportsList(window.hazardData);
+        
+        // Set up filter event listeners
+        document.getElementById('apply-filters').addEventListener('click', filterReports);
+        
+        document.getElementById('region-search').addEventListener('keyup', function(event) {
+            if (event.key === 'Enter') {
+                filterReports();
+            }
+        });
+        
+        // Set up disaster type checkboxes
+        document.querySelectorAll('input[name="disaster-type"]').forEach(checkbox => {
+            checkbox.addEventListener('change', filterReports);
+        });
+        
+        document.getElementById('severity').addEventListener('change', filterReports);
+        
+        // Add zoom event listener to detect zoom changes
+        map.on('zoomend', updateMapViewBasedOnZoom);
+        map.on('moveend', updateMapViewBasedOnZoom);
+        
+    } catch (error) {
+        console.error('Error loading data:', error);
+        document.getElementById('reports-container').innerHTML = 
+            '<p>Error loading hazard data. Please check if the JSON file exists at the correct path.</p>';
+    }
+}
+
+// Initialize the map when page is loaded
+document.addEventListener('DOMContentLoaded', loadData);
+    </script>
+</body>
+</html>

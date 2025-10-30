@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Profile | Samudra Suraksha</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin_profile.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Header -->
+        <header class="admin-header">
+            <div class="header-content">
+                <h1><i class="fas fa-user-shield"></i> Admin Profile</h1>
+                <div class="header-actions">
+                    <button class="btn btn-outline" id="backBtn">
+                        <i class="fas fa-arrow-left"></i> Back to Dashboard
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="admin-main">
+            <div class="profile-grid">
+                <!-- Profile Card -->
+                <div class="profile-card card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-id-card"></i> Profile Information</h2>
+                        <div class="card-actions">
+                            <button id="editBtn" class="btn btn-primary">
+                                <i class="fas fa-edit"></i> Edit Profile
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Loading Skeleton -->
+                    <div id="loadingSkeleton" class="skeleton-container">
+                        <div class="skeleton-avatar"></div>
+                        <div class="skeleton-details">
+                            <div class="skeleton-line large"></div>
+                            <div class="skeleton-line medium"></div>
+                            <div class="skeleton-line small"></div>
+                            <div class="skeleton-line medium"></div>
+                            <div class="skeleton-line large"></div>
+                        </div>
+                    </div>
+
+                    <!-- Profile Content -->
+                    <div id="profileContent" class="card-body" style="display: none;">
+                        <div class="profile-header">
+                            <div class="avatar-section">
+                                <div class="avatar-container">
+                                    <img id="avatarImg" src="" alt="Profile Avatar" class="avatar">
+                                    <div class="avatar-actions" id="avatarActions">
+                                        <label for="avatarInput" class="avatar-upload-btn">
+                                            <i class="fas fa-camera"></i>
+                                            <span>Change Photo</span>
+                                        </label>
+                                        <input type="file" id="avatarInput" accept="image/*" style="display: none;">
+                                    </div>
+                                </div>
+                                <div class="upload-progress" id="uploadProgress" style="display: none;">
+                                    <div class="progress-bar">
+                                        <div class="progress-fill"></div>
+                                    </div>
+                                    <span>Uploading...</span>
+                                </div>
+                            </div>
+                            
+                            <div class="profile-info">
+                                <h1 id="userName" class="user-name">Loading...</h1>
+                                <div class="user-role">
+                                    <span class="role-badge admin-badge">
+                                        <i class="fas fa-shield-alt"></i> Administrator
+                                    </span>
+                                </div>
+                                <div class="user-stats">
+                                    <div class="stat-item">
+                                        <i class="fas fa-calendar-alt"></i>
+                                        <span>Joined: <strong id="joinedDate">Loading...</strong></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <form id="profileForm" class="profile-form">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="name" class="form-label">
+                                        <i class="fas fa-user"></i> Full Name
+                                    </label>
+                                    <input type="text" id="name" name="name" class="form-input" readonly>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="email" class="form-label">
+                                        <i class="fas fa-envelope"></i> Email Address
+                                    </label>
+                                    <input type="email" id="email" name="email" class="form-input" readonly>
+                                    <div class="input-status verified">
+                                        <i class="fas fa-check-circle"></i> Verified
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="mobile" class="form-label">
+                                        <i class="fas fa-phone"></i> Mobile Number
+                                    </label>
+                                    <input type="tel" id="mobile" name="mobile" class="form-input" readonly>
+                                </div>
+
+                                <div class="form-group full-width">
+                                    <label for="address" class="form-label">
+                                        <i class="fas fa-map-marker-alt"></i> Address
+                                    </label>
+                                    <textarea id="address" name="address" class="form-textarea" rows="3" readonly></textarea>
+                                </div>
+
+                                <div class="form-group full-width">
+                                    <label for="note" class="form-label">
+                                        <i class="fas fa-sticky-note"></i> Admin Notes
+                                    </label>
+                                    <textarea id="note" name="note" class="form-textarea" rows="3" placeholder="Add any notes or comments about this admin account..." readonly></textarea>
+                                    <div class="help-text">Optional: Add notes for reference</div>
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="form-actions">
+                                <div id="saveCancelGroup" class="action-group" style="display: none;">
+                                    <button type="submit" id="saveBtn" class="btn btn-success">
+                                        <i class="fas fa-save"></i> Save Changes
+                                    </button>
+                                    <button type="button" id="cancelBtn" class="btn btn-secondary">
+                                        <i class="fas fa-times"></i> Cancel
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Quick Stats Card -->
+                <div class="stats-card card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-chart-bar"></i> Quick Stats</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-icon primary">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <div class="stat-value" id="totalUsers">0</div>
+                                    <div class="stat-label">Total Users</div>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon success">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <div class="stat-value" id="activeUsers">0</div>
+                                    <div class="stat-label">Active Today</div>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon warning">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <div class="stat-value" id="pendingTasks">0</div>
+                                    <div class="stat-label">Pending Tasks</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAkIp1wIdz7LTa5rZ2YJfoKcxTtUEflyhI",
+            authDomain: "samudra-suraksha-477cf.firebaseapp.com",
+            projectId: "samudra-suraksha-477cf",
+            storageBucket: "samudra-suraksha-477cf.firebasestorage.app",
+            messagingSenderId: "538135967467",
+            appId: "1:538135967467:web:938ca314bf21e10acd70ae"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+    </script>
+    <script src="{{ url_for('static', filename='js/admin_profile.js') }}"></script>
+</body>
+</html>
