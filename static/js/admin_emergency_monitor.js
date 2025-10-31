@@ -4,10 +4,8 @@ class AdminEmergencyMonitor {
         this.isConnected = false;
         this.activeSOSAlerts = new Map();
         this.messageCount = 0;
-        this.autoScrollEnabled = true;
         this.lastMessageDate = null;
-        this.unreadMessages = 0;
-        this.scrollPosition = 0;
+        this.isAtBottom = true;
         
         this.initializeApp();
     }
@@ -55,7 +53,9 @@ class AdminEmergencyMonitor {
         this.socket.on('new_message', (data) => {
             console.log('New message received:', data);
             this.displayMessage(data);
-            this.handleNewMessage();
+            if (this.isAtBottom) {
+                this.scrollToBottom();
+            }
         });
 
         this.socket.on('new_sos', (data) => {
@@ -68,7 +68,9 @@ class AdminEmergencyMonitor {
                 message: data.message,
                 timestamp: data.timestamp
             });
-            this.handleNewMessage();
+            if (this.isAtBottom) {
+                this.scrollToBottom();
+            }
         });
 
         // Handle user count updates
@@ -99,119 +101,30 @@ class AdminEmergencyMonitor {
         messageInput.addEventListener('blur', () => {
             messageInput.parentElement.classList.remove('focused');
         });
-
-        // Auto-scroll toggle
-        document.querySelector('.chat-control-btn .fa-arrows-alt-v').closest('.chat-control-btn').addEventListener('click', () => {
-            this.toggleAutoScroll();
-        });
-
-        // Scroll to bottom button
-        document.querySelector('.chat-control-btn .fa-arrow-down').closest('.chat-control-btn').addEventListener('click', () => {
-            this.scrollToBottom(true);
-        });
     }
 
     setupScrollBehavior() {
         const messagesContainer = document.querySelector('.admin-messages');
-        const scrollIndicator = document.getElementById('scroll-indicator');
         
         messagesContainer.addEventListener('scroll', () => {
             this.handleScroll();
-        });
-
-        // Scroll to bottom when indicator is clicked
-        scrollIndicator.addEventListener('click', () => {
-            this.scrollToBottom(true);
-            this.hideScrollIndicator();
         });
     }
 
     handleScroll() {
         const messagesContainer = document.querySelector('.admin-messages');
-        const scrollIndicator = document.getElementById('scroll-indicator');
-        
-        this.scrollPosition = messagesContainer.scrollTop;
+        const scrollTop = messagesContainer.scrollTop;
         const scrollHeight = messagesContainer.scrollHeight;
         const clientHeight = messagesContainer.clientHeight;
-        const scrollBottom = scrollHeight - clientHeight - this.scrollPosition;
         
-        // If user is within 100px of bottom, enable auto-scroll
-        if (scrollBottom <= 100) {
-            this.autoScrollEnabled = true;
-            this.hideScrollIndicator();
-        } else {
-            this.autoScrollEnabled = false;
-        }
-        
-        // Show/hide scroll indicator based on scroll position
-        if (this.autoScrollEnabled || this.unreadMessages === 0) {
-            this.hideScrollIndicator();
-        } else {
-            this.showScrollIndicator();
-        }
+        // Check if user is at bottom (within 50px)
+        this.isAtBottom = (scrollHeight - scrollTop - clientHeight) <= 50;
     }
 
-    handleNewMessage() {
-        if (this.autoScrollEnabled) {
-            this.scrollToBottom();
-        } else {
-            this.unreadMessages++;
-            this.updateScrollIndicator();
-            this.showScrollIndicator();
-        }
-    }
-
-    scrollToBottom(force = false) {
+    scrollToBottom() {
         const messagesContainer = document.querySelector('.admin-messages');
-        
-        if (force) {
-            this.autoScrollEnabled = true;
-        }
-        
-        if (this.autoScrollEnabled) {
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-            this.unreadMessages = 0;
-            this.updateScrollIndicator();
-            this.hideScrollIndicator();
-        }
-    }
-
-    showScrollIndicator() {
-        const scrollIndicator = document.getElementById('scroll-indicator');
-        scrollIndicator.classList.add('visible');
-    }
-
-    hideScrollIndicator() {
-        const scrollIndicator = document.getElementById('scroll-indicator');
-        scrollIndicator.classList.remove('visible');
-    }
-
-    updateScrollIndicator() {
-        const indicatorCount = document.getElementById('indicator-count');
-        indicatorCount.textContent = this.unreadMessages;
-    }
-
-    toggleAutoScroll() {
-        this.autoScrollEnabled = !this.autoScrollEnabled;
-        const autoScrollIcon = document.getElementById('auto-scroll-icon');
-        const autoScrollStatus = document.getElementById('auto-scroll-status');
-        const autoScrollStatusIcon = document.getElementById('auto-scroll-status-icon');
-        const chatControlBtn = document.querySelector('.chat-control-btn .fa-arrows-alt-v').closest('.chat-control-btn');
-        
-        if (this.autoScrollEnabled) {
-            autoScrollIcon.className = 'fas fa-arrows-alt-v';
-            autoScrollStatus.textContent = 'Auto-scroll: ON';
-            autoScrollStatusIcon.style.color = 'var(--success-green)';
-            chatControlBtn.classList.add('active');
-            this.scrollToBottom();
-            this.showToast('Auto-scroll enabled', 'success');
-        } else {
-            autoScrollIcon.className = 'fas fa-arrows-alt-v';
-            autoScrollStatus.textContent = 'Auto-scroll: OFF';
-            autoScrollStatusIcon.style.color = 'var(--light-gray)';
-            chatControlBtn.classList.remove('active');
-            this.showToast('Auto-scroll disabled', 'warning');
-        }
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        this.isAtBottom = true;
     }
 
     async loadInitialData() {
@@ -230,7 +143,7 @@ class AdminEmergencyMonitor {
             
             // Scroll to bottom after loading
             setTimeout(() => {
-                this.scrollToBottom(true);
+                this.scrollToBottom();
             }, 100);
             
         } catch (error) {
@@ -243,6 +156,9 @@ class AdminEmergencyMonitor {
         try {
             const response = await fetch('/api/emergency/sos');
             const sosAlerts = await response.json();
+            
+            // Sort SOS alerts by timestamp (newest first)
+            sosAlerts.sort((a, b) => b.timestamp - a.timestamp);
             
             sosAlerts.forEach(alert => {
                 this.addSOSAlert(alert);
@@ -295,8 +211,8 @@ class AdminEmergencyMonitor {
             acknowledged: false
         });
         
-        // Update UI
-        this.addSOSAlert(data);
+        // Update UI - add to top of the list
+        this.addSOSAlertToTop(data);
         this.updateAlertCount();
         
         // Show modal and play sound
@@ -305,6 +221,57 @@ class AdminEmergencyMonitor {
         
         // Show toast notification
         this.showToast(`🚨 SOS Alert from ${data.sender}`, 'sos');
+    }
+
+    addSOSAlertToTop(alertData) {
+        const container = document.getElementById('sos-alerts-container');
+        const noAlerts = container.querySelector('.no-alerts');
+        
+        // Hide "no alerts" message if it's the first alert
+        if (noAlerts && this.activeSOSAlerts.size === 1) {
+            noAlerts.style.display = 'none';
+        }
+        
+        const alertId = `sos-${alertData.sender}-${alertData.timestamp}`;
+        
+        // Check if alert already exists
+        if (document.getElementById(alertId)) {
+            return;
+        }
+        
+        const alertElement = document.createElement('div');
+        alertElement.className = 'sos-alert-card';
+        alertElement.id = alertId;
+        
+        const timestamp = new Date(alertData.timestamp * 1000);
+        const timeString = timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        
+        alertElement.innerHTML = `
+            <div class="sos-alert-header">
+                <div class="sos-alert-title">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    SOS ALERT
+                </div>
+                <div class="sos-alert-time">${timeString}</div>
+            </div>
+            <div class="sos-alert-sender">${this.escapeHtml(alertData.sender)}</div>
+            <div class="sos-alert-message">${this.escapeHtml(alertData.message)}</div>
+            <div class="sos-alert-location">
+                <i class="fas fa-map-marker-alt"></i>
+                Location: ${alertData.latitude?.toFixed(4)}, ${alertData.longitude?.toFixed(4)}
+            </div>
+        `;
+        
+        alertElement.addEventListener('click', () => {
+            this.showSOSModal(alertData);
+        });
+        
+        // Add to top of container (newest first)
+        if (container.firstChild && container.firstChild.className !== 'no-alerts') {
+            container.insertBefore(alertElement, container.firstChild);
+        } else {
+            container.appendChild(alertElement);
+        }
     }
 
     addSOSAlert(alertData) {
@@ -350,8 +317,7 @@ class AdminEmergencyMonitor {
             this.showSOSModal(alertData);
         });
         
-        // Add to beginning of container
-        container.insertBefore(alertElement, container.firstChild);
+        container.appendChild(alertElement);
     }
 
     showSOSModal(alertData) {
@@ -750,12 +716,8 @@ function insertQuickMessage(message) {
     window.adminMonitor.insertQuickMessage(message);
 }
 
-function toggleAutoScroll() {
-    window.adminMonitor.toggleAutoScroll();
-}
-
 function scrollToBottom() {
-    window.adminMonitor.scrollToBottom(true);
+    window.adminMonitor.scrollToBottom();
 }
 
 function closeSOSModal() {

@@ -118,3 +118,120 @@ if __name__ == "__main__":
     print("   3. Both of you enter names and start chatting!")
     
     socketio.run(app, host='0.0.0.0', port=5000, debug=True)
+
+
+
+# # for vercel 
+# from app import create_app
+# from flask import request, jsonify
+# import sqlite3
+# import time
+# from datetime import datetime
+
+# # Create Flask app
+# app = create_app()
+
+# # ====================================================
+# # Initialize SQLite database for emergency messages
+# # ====================================================
+# def init_emergency_db():
+#     conn = sqlite3.connect('emergency_messages.db')
+#     c = conn.cursor()
+#     c.execute('''
+#         CREATE TABLE IF NOT EXISTS messages (
+#             id INTEGER PRIMARY KEY AUTOINCREMENT,
+#             sender TEXT NOT NULL,
+#             msg TEXT,
+#             type TEXT DEFAULT 'chat',
+#             latitude REAL,
+#             longitude REAL,
+#             timestamp REAL NOT NULL
+#         )
+#     ''')
+#     conn.commit()
+#     conn.close()
+
+# init_emergency_db()
+
+# # ====================================================
+# # Import Blueprints (your main routes)
+# # ====================================================
+# from app.routes import main_bp
+# app.register_blueprint(main_bp)
+
+
+# # ====================================================
+# # REST API Endpoints (for fallback if WebSocket unavailable)
+# # ====================================================
+
+# @app.route("/api/send_message", methods=["POST"])
+# def api_send_message():
+#     data = request.get_json()
+#     if not data or "sender" not in data or "message" not in data:
+#         return jsonify({"error": "Invalid request"}), 400
+
+#     conn = sqlite3.connect("emergency_messages.db")
+#     c = conn.cursor()
+#     c.execute('''
+#         INSERT INTO messages (sender, msg, type, timestamp)
+#         VALUES (?, ?, 'chat', ?)
+#     ''', (data["sender"], data["message"], time.time()))
+#     conn.commit()
+#     conn.close()
+
+#     return jsonify({
+#         "status": "success",
+#         "message": "Message stored successfully"
+#     }), 200
+
+
+# @app.route("/api/send_sos", methods=["POST"])
+# def api_send_sos():
+#     data = request.get_json()
+#     if not data or "sender" not in data:
+#         return jsonify({"error": "Invalid request"}), 400
+
+#     conn = sqlite3.connect("emergency_messages.db")
+#     c = conn.cursor()
+#     c.execute('''
+#         INSERT INTO messages (sender, msg, type, latitude, longitude, timestamp)
+#         VALUES (?, ?, 'sos', ?, ?, ?)
+#     ''', (
+#         data["sender"],
+#         data.get("message", "Emergency SOS"),
+#         data.get("latitude"),
+#         data.get("longitude"),
+#         time.time()
+#     ))
+#     conn.commit()
+#     conn.close()
+
+#     return jsonify({
+#         "status": "success",
+#         "message": "SOS recorded successfully",
+#         "datetime": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+#     }), 200
+
+
+# @app.route("/api/messages", methods=["GET"])
+# def get_messages():
+#     conn = sqlite3.connect("emergency_messages.db")
+#     c = conn.cursor()
+#     c.execute("SELECT sender, msg, type, timestamp FROM messages ORDER BY id DESC LIMIT 50")
+#     rows = c.fetchall()
+#     conn.close()
+
+#     messages = [
+#         {
+#             "sender": r[0],
+#             "message": r[1],
+#             "type": r[2],
+#             "timestamp": datetime.fromtimestamp(r[3]).strftime("%Y-%m-%d %H:%M:%S")
+#         }
+#         for r in rows
+#     ]
+#     return jsonify(messages)
+
+
+
+# app = app
